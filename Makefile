@@ -254,8 +254,8 @@ NUKE:
 	@read -p "Are you sure you want to NUKE the target folder? This will delete all build artifacts. (yes/no): " confirmation; \
 	if [ "$$confirmation" = "yes" ]; then \
 		$(RM) $(TARGET_ROOT_DIR); \
-		echo "ヽ(｀Д´)⊃━☆ﾟ. * ･ ｡ﾟ, Target folder nuked."; \
-		echo " "; \
+		$(ECHO) "ヽ(｀Д´)⊃━☆ﾟ. * ･ ｡ﾟ, Target folder nuked."; \
+		$(ECHO) " "; \
 	else \
 		echo "Aborted."; \
 	fi
@@ -345,6 +345,6 @@ bundle:
 	@$(MKDIR) $(TARGET_ROOT_DIR)/config
 	@$(ECHO) '--FORCE-RELEASE' >> bundle-force-release.txt
 	@echo "Creating bundle..."
-	zip -r $(BUNDLE_DIR)/$(BUNDLE_NAME) ./ -x "target/*" ".git/*" ".vscode"
+	@zip -r $(BUNDLE_DIR)/$(BUNDLE_NAME) ./ -x "target/*" ".git/*" ".vscode"
 	@echo "Bundle created: $(BUNDLE_NAME)"
 	@$(RM) bundle-force-release.txt
