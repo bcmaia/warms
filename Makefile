@@ -1,4 +1,4 @@
-# Makefile
+# MasterMaker
 # Author: β
 # This Makefile is designed to simplify the compilation and build process for any 
 # C/C++ project. It supports both debug and release modes, handles 
@@ -77,9 +77,8 @@ TARGET_DIR := $(TARGET_ROOT_DIR)/$(MODE)
 
 # Directory structure
 SRC_DIR := src
-
 ifneq ($(REQUESTED_SRC),)
-	SRC := REQUESTED_SRC
+    SRC_DIR := $(REQUESTED_SRC)
 endif
 
 INC_DIR := include
@@ -299,3 +298,8 @@ setup:
 	else \
 		echo "Setup skipped."; \
 	fi
+
+reformat:
+	@echo "Deleting lines until 'MasterMaker' is found..."
+	@awk '/MasterMaker/{found=1} !found' $(MAKEFILE_LIST) > temp && mv temp $(MAKEFILE_LIST)
+	@echo "Deletion completed."
