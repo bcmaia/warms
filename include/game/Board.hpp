@@ -23,6 +23,8 @@ class Board {
         void setcell (Position point, Cell cell);
         void render () const;
 
+        Position movement (Position point, Direction dir, short amount) const;
+
     private:
         unsigned short width;
         unsigned short height;

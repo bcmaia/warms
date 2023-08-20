@@ -10,6 +10,6 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     // Generate snakes here using the provided population_size
     for (unsigned i = 0; i < population_size; ++i) {
         unsigned long snakeSeed = dis(gen);
-        agents.emplace_back(snakeSeed);
+        agents.emplace_back(Snake(snakeSeed, Position{0, 0}, 3));
     }
 }

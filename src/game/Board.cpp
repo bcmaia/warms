@@ -50,3 +50,18 @@ void Board::render () const {
     }
     refresh();
 }
+
+Position Board::movement (Position point, Direction dir, short amount = 1) const {
+    switch (dir) {
+        case Direction::Up:
+            return Position{point.x, static_cast<unsigned short>((point.y + amount) % height)};
+        case Direction::Down:
+            return Position{point.x, static_cast<unsigned short>((point.y - amount) % height)};
+        case Direction::Right:
+            return Position{static_cast<unsigned short>((point.x + amount) % width), point.y};
+        case Direction::Left:
+            return Position{static_cast<unsigned short>((point.x - amount) % width), point.y};
+        default: 
+            return point;
+    }
+}

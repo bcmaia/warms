@@ -12,7 +12,7 @@
 
 class Snake {
     public:
-        Snake (unsigned long seed);
+        Snake(unsigned long seed, Position initial, unsigned short start_lenght);
         ~Snake () {};
         void move();
         void think(Board& board);
@@ -23,4 +23,6 @@ class Snake {
         std::vector<float> genes;
         Direction facing;
         std::mt19937 gen;
+        ColorPair colorPair;
+        bool alive;
 };  
