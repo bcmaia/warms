@@ -1,4 +1,4 @@
-#include "board.hpp"
+#include "Board.hpp"
 
 Board::Board() {
     setenv("LANG", "en_US.UTF-8", 1);

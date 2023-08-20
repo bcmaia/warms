@@ -78,7 +78,7 @@
 #include <thread>
 
 #include "types.hpp"
-#include "board.hpp"
+#include "Board.hpp"
 
 
 int main() {
