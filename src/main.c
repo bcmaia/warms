@@ -78,46 +78,15 @@
 #include <thread>
 
 #include "types.hpp"
+#include "board.hpp"
 
-
-void printAtPosition(int x, int y, char character, int colorPair, std::vector<std::vector<Cell>>& buffer) {
-    buffer[y][x] = {character, colorPair};
-    //mvaddch(y, x, character | COLOR_PAIR(colorPair));
-}
-
-void printAtPositionAndRender(int x, int y, char character, ColorPair colorPair, std::vector<std::vector<Cell>>& buffer) {
-    buffer[y][x] = {character, colorPair};
-    mvaddch(y, x, character | COLOR_PAIR(colorPair));
-}
-
-void renderBuffer(const std::vector<std::vector<Cell>>& buffer) {
-    for (size_t y = 0; y < buffer.size(); ++y) {
-        for (size_t x = 0; x < buffer[y].size(); ++x) {
-            const Cell& cell = buffer[y][x];
-            mvaddch(y, x, cell.character | COLOR_PAIR(cell.colorPair));
-        }
-    }
-    refresh();
-}
 
 int main() {
-    setenv("LANG", "en_US.UTF-8", 1);
-
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-    curs_set(FALSE);
-    nodelay(stdscr, TRUE);
-
-    start_color();
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
-
-    int maxX, maxY;
-    getmaxyx(stdscr, maxY, maxX);
-
-    // Initialize buffer with empty cells
-    std::vector<std::vector<Cell>> buffer(maxY, std::vector<Cell>(maxX, {' ', 0}));
+    //========================================================================//
+    //=================|    INITIALIZATION    |===============================//
+    //========================================================================//
+    
+    Board board;
 
     int x = 0, y = 0;
 
@@ -126,12 +95,19 @@ int main() {
     using Clock = std::chrono::high_resolution_clock;
     std::chrono::duration<double> frameDuration(targetFrameDuration);
 
+
+    //========================================================================//
+    //=================|    GAME LOOP    |====================================//
+    //========================================================================//
     while (true) {
         auto frameStart = Clock::now();
         //clear();
 
 
-        printAtPositionAndRender(x, y, '*', 1, buffer);
+        board.printat(
+            Position{static_cast<short unsigned int>(x), static_cast<short unsigned int>(y)},
+            Cell{'*', 1}
+        );
 
         int ch = getch();
 
@@ -139,11 +115,11 @@ int main() {
             break;
         } else if (ch == KEY_UP && y > 0) {
             y--;
-        } else if (ch == KEY_DOWN && y < maxY - 1) {
+        } else if (ch == KEY_DOWN && y < board.getHeight() - 1) {
             y++;
         } else if (ch == KEY_LEFT && x > 0) {
             x--;
-        } else if (ch == KEY_RIGHT && x < maxX - 1) {
+        } else if (ch == KEY_RIGHT && x < board.getWidth() - 1) {
             x++;
         }
 
@@ -158,8 +134,6 @@ int main() {
             std::this_thread::sleep_for(sleepDuration);
         }
     }
-
-    endwin();
 
     return 0;
 }
