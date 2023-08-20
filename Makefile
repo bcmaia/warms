@@ -1,5 +1,7 @@
 # MasterMaker
 # Author: β
+#
+#
 # This Makefile is designed to simplify the compilation and build process for any 
 # C/C++ project. It supports both debug and release modes, handles 
 # automatic dependency generation, and provides various targets for building, 
@@ -23,6 +25,9 @@
 #
 # You don't need to care about paths when importing your headers. In the example
 # above, writing '#include "module_name.hpp"' will sufice.
+#
+# Be aware this Makefile has the capability to change itself. So, it might be 
+# cofusing to tinker with it.
 
 
 
@@ -61,7 +66,7 @@ TARGET_ROOT_DIR := target
 DEBUG_CCFLAGS := -Og -g -ggdb3 -DDEBUG
 RELEASE_CCFLAGS := -O3 -DNDEBUG -pedantic -Werror
 
-ifneq ($(REQUESTED_RELEASE),)
+ifneq ($(wildcard bundle-force-release.txt),)
 	RELEASE := true
 endif
 
@@ -77,9 +82,6 @@ TARGET_DIR := $(TARGET_ROOT_DIR)/$(MODE)
 
 # Directory structure
 SRC_DIR := src
-ifneq ($(REQUESTED_SRC),)
-    SRC_DIR := $(REQUESTED_SRC)
-endif
 
 INC_DIR := include
 OBJ_DIR := $(TARGET_DIR)/obj
@@ -87,7 +89,7 @@ BIN_DIR := $(TARGET_DIR)/bin
 ANALYSIS_DIR := $(TARGET_DIR)/analysis
 EXECUTABLE := $(BIN_DIR)/$(PROGRAM_NAME)
 
-ifeq ($(wildcard $(SRC_DIR)).,)
+ifeq ($(wildcard $(SRC_DIR)),)
     SRC_DIR := .
     INC_DIR := .
 endif
@@ -116,10 +118,31 @@ DEP_FILES := $(CPP_DEP_FILES) $(C_DEP_FILES)
 
 
 
+# Bundle file setup
+BUNDLE_DIR := target/bundle
+BUNDLE_NAME := bundle.zip
+
+
+
+
+
+
+
 
 #==============================================================================/
 #======================| MAIN TARGETS |========================================/
 #==============================================================================/
+
+# Make all the default in runcodes bundle
+ifneq ($(wildcard bundle-force-release.txt),)
+
+all:
+	@$(MK) build -s > /dev/null
+
+run:
+	@$(EXECUTABLE)
+
+endif
 
 # Build target
 build: $(EXECUTABLE)
@@ -140,17 +163,16 @@ endif
 
 
 # Run target
-ifeq ($(REQUESTED_RELEASE),)
+ifeq ($(wildcard bundle-force-release.txt),)
+
 run: build
 	@$(ECHO) "[$(MODE):run]\t Starting program... :)"
 	@$(EXECUTABLE)
-else
-run:
-	@$(EXECUTABLE)
-endif
 
 all:
 	@$(MK) build -s > /dev/null
+
+endif
 
 
 
@@ -191,7 +213,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 #======================| TARGETS |=============================================/
 #==============================================================================/
 
-.PHONY: clean NUKE help setup
+.PHONY: clean NUKE help bundle
 
 # Clean build artifacts
 clean:
@@ -206,6 +228,15 @@ clear: clean
 # Clean and rebuild
 fresh: clean build
 	@$(ECHO) "[$(MODE):fresh]\t Fresh from the oven :)"
+
+# Clean and rebuild
+quick: 
+	$(CLEAR)
+	@$(ECHO) "[$(MODE):qucik]\t Quick! :)"
+	@$(MK) clean --no-print-directory
+	@$(MK) build --no-print-directory
+	@$(MK) run --no-print-directory
+
 
 # Run Valgrind memory analysis
 analysis: build
@@ -251,25 +282,45 @@ gitignore:
 	@$(ECHO) ".gitignore" >> .gitignore
 	@$(ECHO) "Gitignore file created."
 
-bundle: bundle.zip
-	zip -r bundle.zip .
 
 hello:
 	@$(ECHO) "( * ^ *) ノシ"
 	@$(ECHO) "Hello, World!"
 
+# Help target to display available targets and their descriptions
 help:
-	@$(ECHO) "ʕっ•ᴥ•ʔっ Need some help?"
-	@$(ECHO) "Available targets:"
-	@$(ECHO) "  build      - Build the program"
-	@$(ECHO) "  run        - Build and run the program"
-	@$(ECHO) "  clean      - Clean build artifacts"
-	@$(ECHO) "  clear      - Clean and clear the console"
-	@$(ECHO) "  fresh      - Clean, build, and run"
-	@$(ECHO) "  analysis   - Run Valgrind memory analysis"
-	@$(ECHO) "  gitignore  - Create a .gitignore file for common build artifacts"
-	@$(ECHO) "  NUKE       - Delete the target folder (use with caution)"
-	@$(ECHO) "  help       - Display this help message"
+	@echo ""
+	@echo "Welcome to MasterMaker - Makefile Helper"
+	@echo "======================================="
+	@echo ""
+	@echo "NOTE: Try clean or NUKE if errors arise."
+	@echo ""
+	@echo "Available targets:"
+	@echo ""
+	@echo "  build       - Build the program"
+	@echo "  run         - Build and run the program"
+	@echo "  clean       - Clean build artifacts"
+	@echo "  clear       - Clean and clear the console"
+	@echo "  fresh       - Clean, build, and run"
+	@echo "  analysis    - Run Valgrind memory analysis"
+	@echo "  gitignore   - Create a .gitignore file for common build artifacts"
+	@echo "  hello       - Print a friendly greeting"
+	@echo ""
+	@echo "Advanced targets:"
+	@echo ""
+	@echo "  quick       - Quick clean, build, and run"
+	@echo "  bundle      - Create a bundle of your project (excluding build artifacts)"
+	@echo "  NUKE        - Delete the target folder (use with caution)"
+	@echo ""
+	@echo "Optional Configuration:"
+	@echo ""
+	@echo "  RELEASE=true - Build in release mode (optimized)"
+	@echo "                 Use this option to enable optimization flags and build in release mode."
+	@echo "                 Example: 'make build RELEASE=true'"
+	@echo ""
+	@echo "For more details on each target, run 'make <target_name>'"
+	@echo ""
+
 
 
 h: 
@@ -289,17 +340,11 @@ b:
 %: ; @$(if $(filter-out %.d,$@),$($(info ¯\_(ツ)_/¯ Unknown target '$@'. Use 'make help' to see available targets.)))
 
 
-
-setup:
-	@read -p "Enter the name of the 'src' directory (or press Enter to skip): " requested_src; \
-	if [ -n "$$requested_src" ]; then \
-		echo "REQUESTED_SRC := $$requested_src" | cat - $(MAKEFILE_LIST) > temp && mv temp $(MAKEFILE_LIST); \
-		echo "Setup completed. 'REQUESTED_SRC' set to '$$requested_src'."; \
-	else \
-		echo "Setup skipped."; \
-	fi
-
-reformat:
-	@echo "Deleting lines until 'MasterMaker' is found..."
-	@awk '/MasterMaker/{found=1} !found' $(MAKEFILE_LIST) > temp && mv temp $(MAKEFILE_LIST)
-	@echo "Deletion completed."
+bundle:
+	@$(MKDIR) $(TARGET_ROOT_DIR)/bundle
+	@$(MKDIR) $(TARGET_ROOT_DIR)/config
+	@$(ECHO) '--FORCE-RELEASE' >> bundle-force-release.txt
+	@echo "Creating bundle..."
+	zip -r $(BUNDLE_DIR)/$(BUNDLE_NAME) ./ -x "target/*" ".git/*" ".vscode"
+	@echo "Bundle created: $(BUNDLE_NAME)"
+	@$(RM) bundle-force-release.txt
