@@ -8,6 +8,8 @@
 #include <chrono>
 #include <thread>
 #include <memory>
+#include <stdexcept>
+#include <sstream>
 
 #include "types.hpp"
 
@@ -27,9 +29,13 @@ class Board {
 
         bool isSolidAt (Position point) const;
 
-        Position movement (Position point, Direction dir, short amount) const;
+        Position movement (Position point, Direction dir, unsigned short amount) const;
 
         void displayValue(int value);
+
+        static void cleanupNcurses() {
+            endwin(); // Terminate ncurses mode and clean up resources
+        }
 
     private:
         unsigned short width;

@@ -10,7 +10,7 @@ Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned sho
     }
 
     alive = true;
-    facing = Direction::Up;
+    facing = Direction::Right;
 
     //body.reserve(8);
     lenght = start_lenght;
@@ -29,8 +29,10 @@ void Snake::die () {
 }
 
 Position Snake::check_colision(Board& board) {
-    Position new_point = body.front(); //board.movement(body.front(), facing, 1);
-    new_point.x += 1; // debug
+    facing = Direction::Up == facing ? Direction::Left : Direction::Up;
+
+    Position new_point = board.movement(body.front(), facing, 1);
+    //new_point.x += 1; // debug
 
     // if (board.isSolidAt(new_point)) {
     //     die();

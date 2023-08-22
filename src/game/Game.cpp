@@ -62,7 +62,7 @@ void Game::render_agents() {
             board.setcell(position, Cell{'*', snake.colorPair});
         }
         board.setcell(snake.body.front(), Cell{'@', snake.colorPair});
-        board.setcell(snake.body.back(), Cell{'.', snake.colorPair});
+        board.setcell(snake.body.back(), Cell{'+', snake.colorPair});
     }
 }
 
@@ -74,7 +74,7 @@ void Game::run() {
     int x = 0, y = 0;
 
     // Calculate desired frame duration for 100 fps
-    constexpr double targetFrameDuration = 1.0 / 1.0; // 100 fps
+    constexpr double targetFrameDuration = 1.0 / 3.0; // 100 fps
     std::chrono::duration<double> frameDuration(targetFrameDuration);
 
     //measure_time();
@@ -91,7 +91,7 @@ void Game::run() {
 
         board.setcell(
             Position{static_cast<short unsigned int>(x), static_cast<short unsigned int>(y)},
-            Cell{'*', 1}
+            Cell{'X', 1}
         );
 
         render_agents();

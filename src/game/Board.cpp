@@ -25,16 +25,12 @@ Board::Board() {
     auxiliar = std::make_unique<std::vector<std::vector<Cell>>>(
         height, std::vector<Cell>(width, Cell{' ', 1})
     );
+
+    atexit(Board::cleanupNcurses);
 }
 
 Board::~Board() {
-    width = 0;
-    height = 0;
-
-    matrix = NULL;
-    auxiliar = NULL;
-
-    endwin();
+    //endwin();
 }
 
 // void Board::printat (Position point, Cell cell) {
@@ -42,8 +38,37 @@ Board::~Board() {
 //     mvaddch(point.y, point.x, cell.character | COLOR_PAIR(cell.colorPair));
 // }
 
-void Board::setcell (Position point, Cell cell) {
-    (*auxiliar)[point.y][point.x] = cell;
+#include <iostream>
+#include <cstdlib>
+#include <execinfo.h> // For stack trace functions
+
+void printStackTrace() {
+    void* callstack[128];
+    int frames = backtrace(callstack, sizeof(callstack) / sizeof(callstack[0]));
+    char** strs = backtrace_symbols(callstack, frames);
+
+    std::cout << "Stack Trace:" << std::endl;
+    for (int i = 0; i < frames; i++) {
+        std::cout << strs[i] << std::endl;
+    }
+
+    free(strs);
+}
+
+
+    
+void Board::setcell(Position point, Cell cell) {
+    #ifdef RELEASE
+        *auxiliar[point.y][point.x] = cell;
+    #else
+        if (point.x >= width || point.y >= height) {
+            endwin();
+            std::ostringstream errorStream;
+            errorStream << "Point (" << point.x << ", " << point.y << ") is outside of board (" << width << ", " << height << ")";
+            throw std::runtime_error(errorStream.str());
+        }
+        (*auxiliar)[point.y % height][point.x % width] = cell;
+    #endif
 }
 
 void Board::render_static () const {
@@ -70,16 +95,35 @@ void Board::reset () {
     }
 }
 
-Position Board::movement (Position point, Direction dir, short amount = 1) const {
+Position Board::movement (Position point, Direction dir, unsigned short amount = 1) const {
     switch (dir) {
-        case Direction::Up:
+        case Direction::Down: {
             return Position{point.x, static_cast<unsigned short>((point.y + amount) % height)};
-        case Direction::Down:
-            return Position{point.x, static_cast<unsigned short>((point.y - amount) % height)};
-        case Direction::Right:
+        }
+
+        case Direction::Up: {
+            // TODO: Simplify this mess
+            int a = static_cast<int>(amount);
+            int y = static_cast<int>(point.y);
+            int h = static_cast<int>(height);
+            int p = ((y - a) % h + h) % h; // constly, but always correct
+            return Position{point.x, static_cast<unsigned short>(p)};
+        }
+
+        case Direction::Right: {
             return Position{static_cast<unsigned short>((point.x + amount) % width), point.y};
-        case Direction::Left:
-            return Position{static_cast<unsigned short>((point.x - amount) % width), point.y};
+        }
+
+        case Direction::Left: {
+            // TODO: Simplify this mess
+            int a = static_cast<int>(amount);
+            int x = static_cast<int>(point.x);
+            int w = static_cast<int>(width);
+            int p = ((x - a) % w + w) % w; // constly, but always correct
+            
+            return Position{static_cast<unsigned short>(p), point.y};
+        }
+
         default: 
             return point;
     }
