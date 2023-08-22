@@ -8,9 +8,9 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     agents.reserve(population_size);
 
     // Generate snakes here using the provided population_size
-    for (unsigned i = 0; i < population_size; ++i) {
+    for (unsigned i = 0; i < 1 /*population_size*/; ++i) {
         unsigned long snakeSeed = dis(gen);
-        agents.emplace_back(Snake(snakeSeed, Position{0, 0}, 3));
+        agents.emplace_back(Snake(snakeSeed, Position{5, 5}, 3));
     }
 
     running = true;
@@ -40,6 +40,24 @@ void Game::measure_time() {
     delta_time = new_frame_time - old_frame_time;
 }
 
+void Game::calculate_decisions() {
+
+}
+
+void Game::handle_physics() {
+    for (size_t i = 0; i < agents.size(); i++) {
+        agents[i].move(board, 1.0);
+    }
+}
+
+void Game::render_agents() {
+    for (size_t i = 0; i < agents.size(); i++) {
+        for (size_t j = 0; i < agents[i].body.size(); i++) {
+            board.setcell(agents[i].body[j], Cell{'X', agents[i].colorPair});
+        }
+    }
+}
+
 void Game::run() {
     //========================================================================//
     //=================|    INITIALIZATION    |===============================//
@@ -64,6 +82,7 @@ void Game::run() {
             Cell{'*', 1}
         );
 
+        render_agents();
         board.render();
 
         // auto frameEnd = Clock::now();

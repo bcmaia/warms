@@ -17,14 +17,16 @@ class Snake {
         void move(Board& board, float deltaTime);
         Position check_colision(Board& board);
         void think(Board& board);
+
+        ColorPair colorPair;
+        std::deque<Position> body;
     private:
         void die ();
-        std::deque<Position> body;
         unsigned short lenght;
         std::vector<float> genes;
         Direction facing;
         std::mt19937 gen;
-        ColorPair colorPair;
+        
         float speed;
         float movement;
         bool alive;

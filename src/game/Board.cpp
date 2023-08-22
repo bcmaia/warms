@@ -91,3 +91,20 @@ bool Board::isSolidAt (Position point) const {
     return 'X' == (*matrix)[point.y][point.x].character;
 }
 
+
+// bool Board::isSolidAt (Position point) const {
+//     std::vector<std::vector<cell>> subarray(5, std::vector<cell>(5));
+
+//     int matrixWidth = matrix[0].size();
+//     int matrixHeight = matrix.size();
+
+//     for (int i = -2; i <= 2; ++i) {
+//         for (int j = -2; j <= 2; ++j) {
+//             int rowIndex = (x + i + matrixHeight) % matrixHeight;
+//             int colIndex = (y + j + matrixWidth) % matrixWidth;
+//             subarray[i + 2][j + 2] = matrix[rowIndex][colIndex];
+//         }
+//     }
+
+//     return subarray;
+// }

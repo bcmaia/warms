@@ -40,7 +40,7 @@ Position Snake::check_colision(Board& board) {
 
 void Snake::move(Board& board, float deltaTime) {
     movement += speed * deltaTime;
-    if (1 > movement) return;
+    if (1.0 > movement) return;
     movement--;
 
     Position new_point = check_colision(board);
