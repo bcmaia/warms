@@ -15,8 +15,10 @@ Board::Board() {
 
     int maxX, maxY;
     getmaxyx(stdscr, maxY, maxX);
-    width = maxX;
-    height = maxY;
+    width = maxX - 2;
+    height = maxY - 2;
+
+    scr_active = true;
 
     matrix = std::make_unique<std::vector<std::vector<Cell>>>(
         height, std::vector<Cell>(width, Cell{' ', 1})
@@ -71,18 +73,54 @@ void Board::setcell(Position point, Cell cell) {
     #endif
 }
 
+
+static inline void drawOutline(int width, int height) {
+    // Draw top border
+    mvhline(0, 0, ACS_HLINE, width);
+
+    // Draw bottom border
+    mvhline(height - 1, 0, ACS_HLINE, width);
+
+    // Draw left border
+    mvvline(0, 0, ACS_VLINE, height);
+
+    // Draw right border
+    mvvline(0, width - 1, ACS_VLINE, height);
+
+    // Draw corners
+    mvaddch(0, 0, ACS_ULCORNER);
+    mvaddch(0, width - 1, ACS_URCORNER);
+    mvaddch(height - 1, 0, ACS_LLCORNER);
+    mvaddch(height - 1, width - 1, ACS_LRCORNER);
+}
+
+constexpr double SECONDS_TO_MILISECONDS = 1000.0;
+
+void Board::display_delta_time () const {
+    int value = static_cast<int>(SECONDS_TO_MILISECONDS * delta_time);
+
+    // Display the value at the bottom corner
+    mvprintw(height + 1, width - 22, " Delta-time: %d ", value);
+}
+
 void Board::render_static () const {
     for (size_t y = 0; y < matrix->size(); ++y) {
         for (size_t x = 0; x < (*matrix)[y].size(); ++x) {
             const Cell& cell = (*matrix)[y][x];
-            mvaddch(y, x, cell.character | COLOR_PAIR(cell.colorPair));
+            mvaddch(1 + y, 1 + x, cell.character | COLOR_PAIR(cell.colorPair));
         }
     }
-    refresh();
 }
 
 void Board::render () {
-    render_static ();
+    drawOutline(width + 2, height + 2);
+
+    if (scr_active) {render_static ();}
+
+    display_delta_time ();
+
+    refresh();
+
     swap();
     reset();
 }
@@ -153,8 +191,3 @@ bool Board::isSolidAt (Position point) const {
 //     return subarray;
 // }
 
-void Board::displayValue(int value) {
-    // Display the value at the bottom corner
-    mvprintw(height - 1, width - 10, "Value: %d", value);
-    refresh();
-}

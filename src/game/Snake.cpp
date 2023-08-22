@@ -17,7 +17,7 @@ Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned sho
     colorPair = 1;
     body.emplace_back(initial);
 
-    speed = 1;
+    speed = 0.01;
     movement = 0;
 
     // Initialize other member variables if needed

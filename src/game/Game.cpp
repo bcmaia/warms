@@ -23,8 +23,10 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
 void Game::process_inputs(int& x, int& y) {
     int ch = getch();
 
-    if (ch == 'q') {
+    if ('q' == ch) {
         running = false;
+    } else if ('l' == ch) {
+        board.toggle_screen_active();
     } else if (ch == KEY_UP && y > 0) {
         y--;
     } else if (ch == KEY_DOWN && y < board.getHeight() - 1) {
@@ -37,12 +39,12 @@ void Game::process_inputs(int& x, int& y) {
 }
 
 
-void Game::measure_time() {
-    using Clock = std::chrono::high_resolution_clock;
-    old_frame_time = new_frame_time;
-    new_frame_time = Clock::now();
-    delta_time = new_frame_time - old_frame_time;
-}
+// void Game::measure_time() {
+//     using Clock = std::chrono::high_resolution_clock;
+//     old_frame_time = new_frame_time;
+//     new_frame_time = Clock::now();
+//     delta_time = new_frame_time - old_frame_time;
+// }
 
 void Game::calculate_decisions() {
 
@@ -50,7 +52,7 @@ void Game::calculate_decisions() {
 
 void Game::handle_physics(float delta_time) {
     for (size_t i = 0; i < agents.size(); i++) {
-        agents[i].move(board, 1);
+        agents[i].move(board, time_factor * delta_time);
     }
 }
 
@@ -74,8 +76,9 @@ void Game::run() {
     int x = 0, y = 0;
 
     // Calculate desired frame duration for 100 fps
-    constexpr double targetFrameDuration = 1.0 / 3.0; // 100 fps
-    std::chrono::duration<double> frameDuration(targetFrameDuration);
+    constexpr double max_fps = 100;
+    constexpr double min_delta_time = 1.0 / max_fps; // 100 fps
+    // std::chrono::duration<double> frameDuration(targetFrameDuration);
 
     //measure_time();
     //std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -94,21 +97,27 @@ void Game::run() {
             Cell{'X', 1}
         );
 
+        // Simulation
+        double delta_time = timer.get_delta_time();
+        handle_physics( delta_time );
+
+        // Rendering
         render_agents();
-        handle_physics(1);
+        board.set_delta_time( delta_time );
         board.render();
-        board.displayValue(agents[0].body.size());
+        //board.displayValue( timer.get_delta_time() * SECONDS_TO_MILISECONDS );
 
         // auto frameEnd = Clock::now();
         //std::chrono::duration<double> frameTime = frameEnd - frameStart;
 
-        measure_time();
+        timer.measure_time();
+        timer.sync(min_delta_time);
 
-        // Calculate sleep duration to maintain desired frame rate
-        std::chrono::duration<double> sleepDuration = frameDuration - delta_time;
-        if (sleepDuration > std::chrono::duration<double>(0)) {
-            std::this_thread::sleep_for(sleepDuration);
-        }
+        // // Calculate sleep duration to maintain desired frame rate
+        // std::chrono::duration<double> sleepDuration = frameDuration - delta_time;
+        // if (sleepDuration > std::chrono::duration<double>(0)) {
+        //     std::this_thread::sleep_for(sleepDuration);
+        // }
     }
 }
 
