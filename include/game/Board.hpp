@@ -29,6 +29,8 @@ class Board {
 
         Position movement (Position point, Direction dir, short amount) const;
 
+        void displayValue(int value);
+
     private:
         unsigned short width;
         unsigned short height;

@@ -108,3 +108,9 @@ bool Board::isSolidAt (Position point) const {
 
 //     return subarray;
 // }
+
+void Board::displayValue(int value) {
+    // Display the value at the bottom corner
+    mvprintw(height - 1, width - 10, "Value: %d", value);
+    refresh();
+}

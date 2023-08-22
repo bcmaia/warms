@@ -29,11 +29,12 @@ void Snake::die () {
 }
 
 Position Snake::check_colision(Board& board) {
-    Position new_point = board.movement(body.front(), facing, 1);
+    Position new_point = body.front(); //board.movement(body.front(), facing, 1);
+    new_point.x += 1; // debug
 
-    if (board.isSolidAt(new_point)) {
-        die();
-    }
+    // if (board.isSolidAt(new_point)) {
+    //     die();
+    // }
 
     return new_point;
 }
@@ -43,16 +44,20 @@ void Snake::move(Board& board, float deltaTime) {
     if (1.0 > movement) return;
     movement--;
 
-    Position new_point = check_colision(board);
+    // if (!body.empty()) {
+    //     Position frontPos = body.front();
+    //     Position newPos = Position{1 + frontPos.x, frontPos.y};
+    //     body.push_front(newPos);
+    // }
+
+    // printf("Body[0].x = %d", (int)body.back().x);
 
     if (!alive) return;
 
-    if (lenght < body.size() )  {
-        body.push_front(new_point);
-    } else if (lenght == body.size() ) {
-        body.push_front(new_point);
-        (void) body.pop_back();
-    } else /* if (lenght > body.size()) */ {
+    Position new_point = check_colision(board);
+    body.push_front(new_point);
+
+    if (lenght < body.size() ) {
         (void) body.pop_back();
     }
 }

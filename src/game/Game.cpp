@@ -7,10 +7,14 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     // Preallocate the agents vector to the desired size
     agents.reserve(population_size);
 
+    time_factor = 1;
+
+    //delta_time = 1.0;
+
     // Generate snakes here using the provided population_size
     for (unsigned i = 0; i < 1 /*population_size*/; ++i) {
         unsigned long snakeSeed = dis(gen);
-        agents.emplace_back(Snake(snakeSeed, Position{5, 5}, 3));
+        agents.emplace_back(Snake(snakeSeed, Position{5, 5}, 7));
     }
 
     running = true;
@@ -44,17 +48,21 @@ void Game::calculate_decisions() {
 
 }
 
-void Game::handle_physics() {
+void Game::handle_physics(float delta_time) {
     for (size_t i = 0; i < agents.size(); i++) {
-        agents[i].move(board, 1.0);
+        agents[i].move(board, 1);
     }
 }
 
 void Game::render_agents() {
     for (size_t i = 0; i < agents.size(); i++) {
-        for (size_t j = 0; i < agents[i].body.size(); i++) {
-            board.setcell(agents[i].body[j], Cell{'X', agents[i].colorPair});
+        Snake& snake = agents[i];
+
+        for (const Position& position : snake.body)  {
+            board.setcell(position, Cell{'*', snake.colorPair});
         }
+        board.setcell(snake.body.front(), Cell{'@', snake.colorPair});
+        board.setcell(snake.body.back(), Cell{'.', snake.colorPair});
     }
 }
 
@@ -66,8 +74,12 @@ void Game::run() {
     int x = 0, y = 0;
 
     // Calculate desired frame duration for 100 fps
-    constexpr double targetFrameDuration = 1.0 / 100.0; // 100 fps
+    constexpr double targetFrameDuration = 1.0 / 1.0; // 100 fps
     std::chrono::duration<double> frameDuration(targetFrameDuration);
+
+    //measure_time();
+    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    //measure_time();
 
     //========================================================================//
     //=================|    GAME LOOP    |====================================//
@@ -83,7 +95,9 @@ void Game::run() {
         );
 
         render_agents();
+        handle_physics(1);
         board.render();
+        board.displayValue(agents[0].body.size());
 
         // auto frameEnd = Clock::now();
         //std::chrono::duration<double> frameTime = frameEnd - frameStart;

@@ -14,6 +14,7 @@ class Game {
         void run();
         
     private:
+        float time_factor;
         bool running;
         chrono old_frame_time;
         chrono new_frame_time;
@@ -26,6 +27,6 @@ class Game {
         void measure_time();
         void process_inputs(int& x, int& y);
         void calculate_decisions();
-        void handle_physics();
+        void handle_physics(float delta_time);
         void render_agents();
 };
