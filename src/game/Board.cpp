@@ -18,8 +18,13 @@ Board::Board() {
     width = maxX;
     height = maxY;
 
-    matrix = std::make_unique<std::vector<std::vector<Cell>>>(height, std::vector<Cell>(width));
-    auxiliar = std::make_unique<std::vector<std::vector<Cell>>>(height, std::vector<Cell>(width));
+    matrix = std::make_unique<std::vector<std::vector<Cell>>>(
+        height, std::vector<Cell>(width, Cell{' ', 1})
+    );
+
+    auxiliar = std::make_unique<std::vector<std::vector<Cell>>>(
+        height, std::vector<Cell>(width, Cell{' ', 1})
+    );
 }
 
 Board::~Board() {
@@ -32,16 +37,16 @@ Board::~Board() {
     endwin();
 }
 
-void Board::printat (Position point, Cell cell) {
-    (*matrix)[point.y][point.x] = cell;
-    mvaddch(point.y, point.x, cell.character | COLOR_PAIR(cell.colorPair));
-}
+// void Board::printat (Position point, Cell cell) {
+//     (*matrix)[point.y][point.x] = cell;
+//     mvaddch(point.y, point.x, cell.character | COLOR_PAIR(cell.colorPair));
+// }
 
 void Board::setcell (Position point, Cell cell) {
-    (*matrix)[point.y][point.x] = cell;
+    (*auxiliar)[point.y][point.x] = cell;
 }
 
-void Board::render () const {
+void Board::render_static () const {
     for (size_t y = 0; y < matrix->size(); ++y) {
         for (size_t x = 0; x < (*matrix)[y].size(); ++x) {
             const Cell& cell = (*matrix)[y][x];
@@ -49,6 +54,20 @@ void Board::render () const {
         }
     }
     refresh();
+}
+
+void Board::render () {
+    render_static ();
+    swap();
+    reset();
+}
+
+void Board::reset () {
+    for (size_t i = 0; i < height; i++) {
+        for (size_t j = 0; j < width; j++) {
+            (*auxiliar)[i][j] = Cell{' ', 0};
+        }
+    }
 }
 
 Position Board::movement (Position point, Direction dir, short amount = 1) const {
@@ -65,3 +84,10 @@ Position Board::movement (Position point, Direction dir, short amount = 1) const
             return point;
     }
 }
+
+
+
+bool Board::isSolidAt (Position point) const {
+    return 'X' == (*matrix)[point.y][point.x].character;
+}
+

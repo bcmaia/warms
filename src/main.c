@@ -78,62 +78,15 @@
 #include <thread>
 
 #include "types.hpp"
-#include "Board.hpp"
+#include "Game.hpp"
 
 
 int main() {
-    //========================================================================//
-    //=================|    INITIALIZATION    |===============================//
-    //========================================================================//
-    
-    Board board;
+    unsigned long seed = 1;
+    unsigned population_size = 10;
 
-    int x = 0, y = 0;
-
-    // Calculate desired frame duration for 100 fps
-    constexpr double targetFrameDuration = 1.0 / 100.0; // 100 fps
-    using Clock = std::chrono::high_resolution_clock;
-    std::chrono::duration<double> frameDuration(targetFrameDuration);
-
-
-    //========================================================================//
-    //=================|    GAME LOOP    |====================================//
-    //========================================================================//
-    while (true) {
-        auto frameStart = Clock::now();
-        //clear();
-
-
-        board.printat(
-            Position{static_cast<short unsigned int>(x), static_cast<short unsigned int>(y)},
-            Cell{'*', 1}
-        );
-
-        int ch = getch();
-
-        if (ch == 'q') {
-            break;
-        } else if (ch == KEY_UP && y > 0) {
-            y--;
-        } else if (ch == KEY_DOWN && y < board.getHeight() - 1) {
-            y++;
-        } else if (ch == KEY_LEFT && x > 0) {
-            x--;
-        } else if (ch == KEY_RIGHT && x < board.getWidth() - 1) {
-            x++;
-        }
-
-        //renderBuffer(buffer);
-
-        auto frameEnd = Clock::now();
-        std::chrono::duration<double> frameTime = frameEnd - frameStart;
-
-        // Calculate sleep duration to maintain desired frame rate
-        std::chrono::duration<double> sleepDuration = frameDuration - frameTime;
-        if (sleepDuration > std::chrono::duration<double>(0)) {
-            std::this_thread::sleep_for(sleepDuration);
-        }
-    }
+    Game game(seed, population_size);
+    game.run();
 
     return 0;
 }

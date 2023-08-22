@@ -19,9 +19,13 @@ class Board {
         unsigned short getWidth () const {return width;};
         unsigned short getHeight () const {return height;};
 
-        void printat (Position point, Cell cell);
+        //void printat (Position point, Cell cell);
         void setcell (Position point, Cell cell);
-        void render () const;
+        void render_static () const;
+
+        void render ();
+
+        bool isSolidAt (Position point) const;
 
         Position movement (Position point, Direction dir, short amount) const;
 
@@ -32,5 +36,6 @@ class Board {
         std::unique_ptr<std::vector<std::vector<Cell>>> matrix;
         std::unique_ptr<std::vector<std::vector<Cell>>> auxiliar;
 
-        void swapMatrices() {std::swap(matrix, auxiliar);};
+        void swap() {std::swap(matrix, auxiliar);};
+        void reset ();
 };

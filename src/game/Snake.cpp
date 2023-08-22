@@ -17,13 +17,42 @@ Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned sho
     colorPair = 1;
     body.emplace_back(initial);
 
+    speed = 1;
+    movement = 0;
+
     // Initialize other member variables if needed
     // Example: initialize body, length, facing, etc.
 }
 
+void Snake::die () {
+    alive = false;
+}
 
-// void Snake::move() {
-//     if (1 == body.size() )  {
-//         body.push_back();
-//     }
-// }
+Position Snake::check_colision(Board& board) {
+    Position new_point = board.movement(body.front(), facing, 1);
+
+    if (board.isSolidAt(new_point)) {
+        die();
+    }
+
+    return new_point;
+}
+
+void Snake::move(Board& board, float deltaTime) {
+    movement += speed * deltaTime;
+    if (1 > movement) return;
+    movement--;
+
+    Position new_point = check_colision(board);
+
+    if (!alive) return;
+
+    if (lenght < body.size() )  {
+        body.push_front(new_point);
+    } else if (lenght == body.size() ) {
+        body.push_front(new_point);
+        (void) body.pop_back();
+    } else /* if (lenght > body.size()) */ {
+        (void) body.pop_back();
+    }
+}

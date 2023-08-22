@@ -1,9 +1,32 @@
+# The MIT License (MIT)
+#
+# Copyright © 2023 β
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy 
+# of this software and associated documentation files (the “Software”), to deal 
+# in the Software without restriction, including without limitation the rights 
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+# copies of the Software, and to permit persons to whom the Software is 
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in 
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, 
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
+# OR OTHER DEALINGS IN THE SOFTWARE.
+
+
 # MasterMaker
 # Author: β
 #
-#
 # This Makefile is designed to simplify the compilation and build process for any 
-# C/C++ project. It supports both debug and release modes, handles 
+# C/C++ project of small or medium size. 
+# It supports both debug and release modes, handles 
 # automatic dependency generation, and provides various targets for building, 
 # running, cleaning, and even analyzing the program using Valgrind. It will accept
 # both c and cpp files and it can handle diferent project file structures.
@@ -41,7 +64,7 @@
 PROGRAM_NAME := myapp
 CC := g++
 CCFLAGS := -Wall -Wextra
-LDFLAGS := -lncurses
+LDFLAGS := -lm -lncurses
 STD_MODE := debug
 VALGRIND_FLAGS := --leak-check=full --show-leak-kinds=all
 
@@ -185,21 +208,38 @@ endif
 
 # Compile source files and link to executable
 $(EXECUTABLE): $(OBJ_FILES)
-	@$(MKDIR) $(@D)
 	@$(ECHO) "[$(MODE):rule:link]\t Linking executable '$(PROGRAM_NAME)'..."
-	@$(CC) $(CCFLAGS) $(INCLUDE) $^ -o $@ $(LDFLAGS)
+ifeq ($(VERBOSE),)
+	@$(MKDIR) "$(@D)"
+	@$(CC) $(CCFLAGS) $(INCLUDE) $^ -o "$@" $(LDFLAGS)
+else
+	$(MKDIR) "$(@D)"
+	$(CC) $(CCFLAGS) $(INCLUDE) $^ -o "$@" $(LDFLAGS)
+endif
 
 # Compile C++ source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@$(MKDIR) -p $(@D)
 	@$(ECHO) "[$(MODE):rule:compile]\t Compiling $(subst $(OBJ_DIR)/,,$@)..."
-	@$(CC) $(CCFLAGS) $(INCLUDE) -MMD -MP -c $< -o $@
+ifeq ($(VERBOSE),)
+	@$(MKDIR) "$(@D)"
+	@$(CC) $(CCFLAGS) $(INCLUDE) -MMD -MP -c "$<" -o "$@"
+else
+	$(MKDIR) "$(@D)"
+	$(CC) $(CCFLAGS) $(INCLUDE) -MMD -MP -c "$<" -o "$@"
+endif
+
 
 # Compile C source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@$(MKDIR) -p $(@D)
 	@$(ECHO) "[$(MODE):rule:compile]\t Compiling $(subst $(OBJ_DIR)/,,$@)..."
-	@$(CC) $(CCFLAGS) $(INCLUDE) -MMD -MP -c $< -o $@
+ifeq ($(VERBOSE),)
+	@$(MKDIR) $(@D)
+	@$(CC) $(CCFLAGS) $(INCLUDE) -MMD -MP -c "$<" -o "$@"
+else
+	$(MKDIR) $(@D)
+	$(CC) $(CCFLAGS) $(INCLUDE) -MMD -MP -c "$<" -o "$@"
+endif
+
 
 # Include dependency files
 -include $(DEP_FILES)
@@ -219,7 +259,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 clean:
 	@$(ECHO) "ʕノ•ᴥ•ʔノ ︵ ┻━┻"
 	@$(ECHO) "[$(MODE):clean]\t Cleaning this mess..."
-	@$(RM) $(TARGET_DIR)
+	@$(RM) "$(TARGET_DIR)"
 
 # Clean and clear the console
 clear: clean
@@ -241,11 +281,11 @@ quick:
 # Run Valgrind memory analysis
 analysis: build
 	@$(ECHO) "[$(MODE):analysis]\t Starting analysis..."
-	@$(MKDIR) $(ANALYSIS_DIR)
+	@$(MKDIR) "$(ANALYSIS_DIR)"
 	@$(eval ANALYSIS_COUNT := $(shell ls -1 $(ANALYSIS_DIR) | grep -oE 'valgrind_analysis_[0-9]+' | sort -rn | head -n 1 | grep -oE '[0-9]+'))
 	@$(eval NEXT_ANALYSIS_COUNT := $(shell echo $$(($(ANALYSIS_COUNT) + 1))))
 	@$(eval ANALYSIS_FILENAME := valgrind_analysis_$(shell printf "%03d" $(NEXT_ANALYSIS_COUNT)).txt)
-	valgrind $(VALGRIND_FLAGS) $(EXECUTABLE) > $(ANALYSIS_DIR)/$(ANALYSIS_FILENAME) 2>&1
+	valgrind $(VALGRIND_FLAGS) "$(EXECUTABLE)" > "$(ANALYSIS_DIR)/$(ANALYSIS_FILENAME)" 2>&1
 
 # Prompt for user confirmation before nuking the target folder
 NUKE:
@@ -253,7 +293,7 @@ NUKE:
 	@$(ECHO) "	( 0 _ 0 )"
 	@read -p "Are you sure you want to NUKE the target folder? This will delete all build artifacts. (yes/no): " confirmation; \
 	if [ "$$confirmation" = "yes" ]; then \
-		$(RM) $(TARGET_ROOT_DIR); \
+		$(RM) "$(TARGET_ROOT_DIR)"; \
 		$(ECHO) "ヽ(｀Д´)⊃━☆ﾟ. * ･ ｡ﾟ, Target folder nuked."; \
 		$(ECHO) " "; \
 	else \
@@ -341,8 +381,8 @@ b:
 
 
 bundle:
-	@$(MKDIR) $(TARGET_ROOT_DIR)/bundle
-	@$(MKDIR) $(TARGET_ROOT_DIR)/config
+	@$(MKDIR) "$(TARGET_ROOT_DIR)/bundle"
+	@$(MKDIR) "$(TARGET_ROOT_DIR)/config"
 	@$(ECHO) '--FORCE-RELEASE' >> bundle-force-release.txt
 	@echo "Creating bundle..."
 	@zip -r $(BUNDLE_DIR)/$(BUNDLE_NAME) ./ -x "target/*" ".git/*" ".vscode"
