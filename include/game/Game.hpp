@@ -4,6 +4,7 @@
 
 #include "types.hpp"
 #include "Snake.hpp"
+#include "Timer.hpp"
 
 using chrono = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
@@ -14,6 +15,7 @@ class Game {
         void run();
         
     private:
+        Timer timer;
         float time_factor;
         bool running;
         chrono old_frame_time;

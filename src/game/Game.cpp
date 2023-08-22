@@ -5,7 +5,7 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     std::uniform_int_distribution<unsigned long> dis(0, std::numeric_limits<unsigned long>::max());
     
     // Preallocate the agents vector to the desired size
-    agents.reserve(population_size);
+    //agents.reserve(population_size);
 
     time_factor = 1;
 
@@ -34,14 +34,6 @@ void Game::process_inputs(int& x, int& y) {
     } else if (ch == KEY_RIGHT && x < board.getWidth() - 1) {
         x++;
     }
-}
-
-
-void Game::measure_time() {
-    using Clock = std::chrono::high_resolution_clock;
-    old_frame_time = new_frame_time;
-    new_frame_time = Clock::now();
-    delta_time = new_frame_time - old_frame_time;
 }
 
 void Game::calculate_decisions() {
@@ -74,8 +66,7 @@ void Game::run() {
     int x = 0, y = 0;
 
     // Calculate desired frame duration for 100 fps
-    constexpr double targetFrameDuration = 1.0 / 1.0; // 100 fps
-    std::chrono::duration<double> frameDuration(targetFrameDuration);
+    const double targetFrameDuration = 1.0 / 1.0; // 100 fps
 
     //measure_time();
     //std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -102,12 +93,10 @@ void Game::run() {
         // auto frameEnd = Clock::now();
         //std::chrono::duration<double> frameTime = frameEnd - frameStart;
 
-        measure_time();
+        double sleep_time = targetFrameDuration - timer.get_delta_time();
 
-        // Calculate sleep duration to maintain desired frame rate
-        std::chrono::duration<double> sleepDuration = frameDuration - delta_time;
-        if (sleepDuration > std::chrono::duration<double>(0)) {
-            std::this_thread::sleep_for(sleepDuration);
+        if (0.001 < sleep_time) {
+            std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
         }
     }
 }
