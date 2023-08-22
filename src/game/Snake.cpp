@@ -29,7 +29,7 @@ void Snake::die () {
 }
 
 Position Snake::check_colision(Board& board) {
-    facing = Direction::Up == facing ? Direction::Left : Direction::Up;
+    facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
 
     Position new_point = board.movement(body.front(), facing, 1);
     //new_point.x += 1; // debug
