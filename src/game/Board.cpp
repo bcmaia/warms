@@ -18,11 +18,13 @@ Board::Board() {
     width = maxX;
     height = maxY;
 
-    m1.resize(height, std::vector<Cell>(width, Cell{' ', 0}));
-    m2.resize(height, std::vector<Cell>(width, Cell{' ', 0}));
+    matrix = std::make_unique<std::vector<std::vector<Cell>>>(
+        height, std::vector<Cell>(width, Cell{' ', 1})
+    );
 
-    matrix = &m1;
-    auxiliar = &m2;
+    auxiliar = std::make_unique<std::vector<std::vector<Cell>>>(
+        height, std::vector<Cell>(width, Cell{' ', 1})
+    );
 }
 
 Board::~Board() {
