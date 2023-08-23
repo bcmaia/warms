@@ -63,3 +63,4 @@ void Snake::move(Board& board, float deltaTime) {
         (void) body.pop_back();
     }
 }
+

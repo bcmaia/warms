@@ -191,3 +191,27 @@ bool Board::isSolidAt (Position point) const {
 //     return subarray;
 // }
 
+Position Board::trueCoords (const Position p) const {
+    return Position {
+        p.x % width,
+        p.y % height
+    };
+}
+
+// Sensorial extraction
+std::vector<std::vector<float>> Board::getSensorialData (
+    unsigned short x, 
+    unsigned short y
+) {
+    std::vector<std::vector<float>> slice (5, std::vector<float>(5));
+
+    for (int i = -2; i <= 2; ++i) {
+        for (int j = -2; j <= 2; ++j) {
+            Position p = trueCoords( Position{x + i, y + j} );
+
+            slice[i + 2][j + 2] = cell_map( (*matrix)[p.y][p.x] );
+        }
+    }
+
+    return slice;
+}

@@ -41,6 +41,9 @@ class Board {
             scr_active = !scr_active;
         }
 
+        std::vector<std::vector<float>> getSensorialData(unsigned short x, unsigned short y);
+        Position trueCoords (const Position p) const; 
+
     private:
         float delta_time;
         bool scr_active;

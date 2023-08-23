@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <unordered_map>
 
 
-typedef int ColorPair;
+typedef unsigned char ColorPair;
 
 struct Cell {
-    char character;
+    unsigned char character;
     ColorPair colorPair;
 };
 
@@ -19,3 +20,5 @@ struct Position {
 enum class Direction : uint8_t {
     Up, Down, Right, Left,
 };
+
+float cell_map (const Cell cell);
