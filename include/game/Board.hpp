@@ -48,15 +48,10 @@ class Board {
         void set_line(const Line& line, const Cell& cell);
         void set_line(const Position& p1, const Position& p2, const Cell& cell);
 
-        Position fit (Position p) {
-            return p % dimentions;
-        }
-
     private:
         float delta_time;
         bool scr_active;
 
-        Position dimentions;
         unsigned short width;
         unsigned short height;
 
