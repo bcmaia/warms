@@ -15,6 +15,7 @@ class Game {
         void run();
         
     private:
+        int population_size;
         void render_agents_setup();
 
         float time_factor;
@@ -27,7 +28,7 @@ class Game {
 
         void measure_time();
         void process_inputs(int& x, int& y, char& type, bool& fast);
-        void calculate_decisions();
+        void reproduce();
         void handle_physics(float delta_time);
         void render_agents();
         void process_thought();

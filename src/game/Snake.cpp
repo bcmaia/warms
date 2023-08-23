@@ -1,6 +1,7 @@
 #include "Snake.hpp"
 
 
+
 Snake::Snake(
     unsigned long seed, 
     Position initial = Position{0, 0}, 
@@ -14,6 +15,7 @@ Snake::Snake(
     //     genes[i] = dis(gen);
     // }
 
+    time_alive = 0;
     moved = false;
     alive = true;
     float r = dis(gen);
@@ -27,6 +29,8 @@ Snake::Snake(
 
     speed = 0.01;
     movement = 0;
+
+    shrink = 0;
 
     // Initialize other member variables if needed
     // Example: initialize body, length, facing, etc.
@@ -76,6 +80,12 @@ void Snake::move(Board& board, float deltaTime) {
     // If we are alive
     if (!alive) return;
 
+    shrink += SHRINK_FACTOR * deltaTime;
+    if (1.0 > shrink) {
+        lenght--;
+        shrink--;
+    }
+
     // If we have momentum
     movement += speed * deltaTime;
     if (1.0 > movement) return;
@@ -105,6 +115,8 @@ void Snake::move(Board& board, float deltaTime) {
         dead_cell.set_value(body.back());
         body.pop_back();
     }
+
+    time_alive += deltaTime;
 }
 
 
@@ -143,5 +155,9 @@ void Snake::survival_test(Board& board) {
 
     // TODO: Handle death sequence
     //...
+}
+
+bool compare_snakes (const Snake& s1, const Snake& s2) {
+    return s1.time_alive < s2.time_alive;
 }
 

@@ -1,11 +1,11 @@
 #include "Game.hpp"
 
-Game::Game(unsigned long seed, unsigned population_size) : board() {
-    std::mt19937 gen(seed);
+Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), population_size(population_size) {
+    //std::mt19937 gen(seed);
     std::uniform_int_distribution<unsigned long> dis(0, std::numeric_limits<unsigned long>::max());
     
     // Preallocate the agents vector to the desired size
-    agents.reserve(population_size);
+    agents.reserve(population_size + 1);
 
     time_factor = 1;
 
@@ -18,7 +18,7 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
         //ColorPair color = 1 + dis(gen) % 10;
 
         Position p = board.rand_empty_position(snakeSeed);
-        agents.emplace_back(Snake(snakeSeed, p, 7));
+        agents.push_back(Snake(snakeSeed, p, 7));
     }
 
     running = true;
@@ -57,9 +57,54 @@ void Game::process_inputs(int& x, int& y, char& type, bool& fast) {
 //     delta_time = new_frame_time - old_frame_time;
 // }
 
-void Game::calculate_decisions() {
+void Game::reproduce() {
+    //return;
+    std::uniform_int_distribution<std::size_t> index_dist (0, agents.size() - 1);
+    std::uniform_int_distribution<unsigned long> seed_dist (0, std::numeric_limits<unsigned long>::max());
+    //return;
+    std::vector<Snake> new_snakes;
 
+    // the 2 fors keep things fair
+    for (size_t i = 0; i < agents.size(); i++) {
+        Snake& snake = agents[i];
+        if (!snake.alive) {
+            //continue;
+            std::size_t index1 = index_dist(gen);
+            std::size_t index2 = index_dist(gen);
+
+            Snake& parent1 = (
+                agents[index1].time_alive > agents[index2].time_alive 
+                ? agents[index1] 
+                : agents[index2]
+            );
+
+            index1 = index_dist(gen);
+            index2 = index_dist(gen);
+
+            Snake& parent2 = (
+                agents[index1].time_alive > agents[index2].time_alive 
+                ? agents[index1] 
+                : agents[index2]
+            );
+
+            // index1 = index_dist(gen);
+            // index2 = index_dist(gen);
+            // Snake& competitor1 = agents[index1];
+            // Snake& competitor2 = agents[index2];
+            // Snake& parent1 =  agents[index1].time_alive > agents[index2].time_alive ? agents[index1] : agents[index2];
+
+            // index1 = index_dist(gen) % agents.size();
+            // index2 = index_dist(gen) % agents.size();
+            // Snake& parent2 = agents[index1].time_alive > agents[index2].time_alive ? agents[index1] : agents[index2];
+
+            unsigned long snakeSeed = seed_dist(gen);
+            Position p = board.rand_empty_position(snakeSeed);
+            agents.erase(agents.begin() + i);
+            agents.push_back(Snake(parent1, parent2, snakeSeed, p, 7));
+        }
+    }
 }
+
 
 void Game::handle_physics(float delta_time) {
     for (size_t i = 0; i < agents.size(); i++) {
@@ -122,6 +167,7 @@ void Game::run() {
     while (running) {
         // auto frameStart = Clock::now();
 
+        
         process_inputs(x, y, type, fast);
 
         // board.pri(
@@ -148,6 +194,9 @@ void Game::run() {
 
         timer.measure_time();
         if (!fast) {timer.sync(min_delta_time);}
+
+        reproduce();
+
         // // Calculate sleep duration to maintain desired frame rate
         // std::chrono::duration<double> sleepDuration = frameDuration - delta_time;
         // if (sleepDuration > std::chrono::duration<double>(0)) {

@@ -277,8 +277,8 @@ Position Board::rand_empty_position (unsigned long seed) {
     int h = (int)height; 
 
     std::mt19937 gen(seed);
-    std::uniform_int_distribution<int> dis_width (0, w);
-    std::uniform_int_distribution<int> dis_height (0, h);
+    std::uniform_int_distribution<int> dis_width (0, w - 1);
+    std::uniform_int_distribution<int> dis_height (0, h - 1);
 
     int search_count = 100;
     while (0 < search_count--) {
