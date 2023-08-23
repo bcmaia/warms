@@ -73,6 +73,26 @@ void Board::setcell(Position point, Cell cell) {
     #endif
 }
 
+void Board::set_line(const Line& line, const Cell& cell) {
+    Position delta = line.p2 - line.p1;
+    for (unsigned int i = 0; i <= delta.manhattan_magnitude(); ++i) {
+        Position dist = delta.trim(i);
+        Position currentPos = line.p1 + dist;
+        //mvaddch(currentPos.y, currentPos.x, cell.character | COLOR_PAIR(cell.colorPair));
+        setcell(currentPos, cell);
+    }
+}
+
+void Board::set_line(const Position& p1, const Position& p2, const Cell& cell) {
+    Position delta = p2 - p1;
+    for (unsigned int i = 0; i <= delta.manhattan_magnitude(); ++i) {
+        Position dist = delta.trim(i);
+        Position currentPos = p1 + dist;
+        //mvaddch(currentPos.y, currentPos.x, cell.character | COLOR_PAIR(cell.colorPair));
+        setcell(currentPos, cell);
+    }
+}
+
 
 static inline void drawOutline(int width, int height) {
     // Draw top border
@@ -136,7 +156,7 @@ void Board::reset () {
 Position Board::movement (Position point, Direction dir, unsigned short amount = 1) const {
     switch (dir) {
         case Direction::Down: {
-            return Position{point.x, static_cast<unsigned short>((point.y + amount) % height)};
+            return Position(point.x, static_cast<unsigned>((point.y + amount) % height));
         }
 
         case Direction::Up: {
@@ -145,11 +165,11 @@ Position Board::movement (Position point, Direction dir, unsigned short amount =
             int y = static_cast<int>(point.y);
             int h = static_cast<int>(height);
             int p = ((y - a) % h + h) % h; // constly, but always correct
-            return Position{point.x, static_cast<unsigned short>(p)};
+            return Position(point.x, static_cast<unsigned>(p));
         }
 
         case Direction::Right: {
-            return Position{static_cast<unsigned short>((point.x + amount) % width), point.y};
+            return Position(static_cast<unsigned>((point.x + amount) % width), point.y);
         }
 
         case Direction::Left: {
@@ -159,14 +179,13 @@ Position Board::movement (Position point, Direction dir, unsigned short amount =
             int w = static_cast<int>(width);
             int p = ((x - a) % w + w) % w; // constly, but always correct
             
-            return Position{static_cast<unsigned short>(p), point.y};
+            return Position(static_cast<unsigned>(p), point.y);
         }
 
         default: 
             return point;
     }
 }
-
 
 
 bool Board::isSolidAt (Position point) const {

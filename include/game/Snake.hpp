@@ -14,17 +14,24 @@ class Snake {
     public:
         Snake(unsigned long seed, Position initial, unsigned short start_lenght);
         ~Snake () {};
-        void move(Board& board, float deltaTime);
+        void move(Board& board, float delta_time);
         Position check_colision(Board& board);
         void think(Board& board);
 
         ColorPair colorPair;
         std::deque<Position> body;
+
+        void shed_dead_cells (Board& board);
+        void show_new_cells (Board& board);
     private:
+        std::vector<Position> deadCells;
+        std::vector<Position> newCells;
+
         void die ();
         unsigned short lenght;
         std::vector<float> genes;
         Direction facing;
+        Direction oldFacing;
         std::mt19937 gen;
         
         float speed;
