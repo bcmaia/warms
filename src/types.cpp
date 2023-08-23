@@ -68,3 +68,38 @@ bool Position::operator==(const Position& other) const {
 bool Position::operator!=(const Position& other) const {
     return (x != other.x) || (y != other.y);
 }
+
+// Takes dimentions, asumes they are positive
+bool Position::inside(const Position& dimentions) const {
+    return (
+        (0 <= x)
+        && (0 <= y)
+        && (dimentions.x > x)
+        && (dimentions.y > y)
+    );
+}
+
+Position Position::mold (const Position& dimentions) const {
+    return Position{
+        (x % dimentions.x + dimentions.x) % dimentions.x,
+        (y % dimentions.y + dimentions.y) % dimentions.y,
+    };
+}
+
+
+
+Direction rotate (Direction d, bool clockwise = true) {
+    if (clockwise) switch (d) {
+            case Direction::Up:     return Direction::Right;
+            case Direction::Right:  return Direction::Down;
+            case Direction::Down:   return Direction::Left;
+            case Direction::Left:   return Direction::Up;
+    } else switch (d) {
+        case Direction::Up:     return Direction::Left;
+        case Direction::Right:  return Direction::Up;
+        case Direction::Down:   return Direction::Right;
+        case Direction::Left:   return Direction::Down;
+    }
+
+    return d; // error case
+}

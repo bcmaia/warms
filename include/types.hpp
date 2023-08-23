@@ -4,6 +4,11 @@
 #include <unordered_map>
 #include <cmath>
 #include <stdexcept>
+#include <vector>
+
+
+using vectorf32 = std::vector<float>;
+using matrixf32 = std::vector<std::vector<float>>;
 
 
 typedef unsigned char ColorPair;
@@ -32,6 +37,9 @@ class Position {
         unsigned manhattan_magnitude () const;
         Position abs () const;
 
+        bool inside(const Position& dimentions) const;
+        Position mold (const Position& dimentions) const;
+
         unsigned manhattan_distance (const Position& p) const;
         Position trim (const int max) const;
 
@@ -44,8 +52,10 @@ class Position {
 };
 
 enum class Direction : uint8_t {
-    Up, Down, Right, Left,
+    Up, Right, Down, Left,
 };
+
+Direction rotate (Direction d, bool clockwise);
 
 float cell_map (const Cell cell);
 

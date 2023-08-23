@@ -32,6 +32,7 @@ Board::Board() {
     getmaxyx(stdscr, maxY, maxX);
     width = maxX - 2;
     height = maxY - 2;
+    dimentions = Position{width, height};
 
     scr_active = true;
 
@@ -149,6 +150,16 @@ void Board::render () {
     //reset();
 }
 
+void Board::toggle_screen_active() {
+    scr_active = !scr_active;
+
+    drawOutline(width + 2, height + 2);
+    render_static ();
+    mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_type | COLOR_PAIR(1));
+    display_delta_time ();
+    refresh();
+}
+
 void Board::reset () {
     for (size_t i = 0; i < height; i++) {
         for (size_t j = 0; j < width; j++) {
@@ -208,25 +219,15 @@ bool Board::compare (const Position point, const char c) const {
 }
 
 
-Position Board::trueCoords (const Position p) const {
-    return Position {
-        p.x % width,
-        p.y % height
-    };
-}
-
 // Sensorial extraction
-std::vector<std::vector<float>> Board::getSensorialData (
-    unsigned short x, 
-    unsigned short y
-) {
-    std::vector<std::vector<float>> slice (5, std::vector<float>(5));
+vectorf32 Board::get_sensorial_data (Position p) {
+    vectorf32 slice;
+    slice.reserve(32);
 
-    for (int i = -2; i <= 2; ++i) {
-        for (int j = -2; j <= 2; ++j) {
-            Position p = trueCoords( Position{x + i, y + j} );
-
-            slice[i + 2][j + 2] = (*matrix)[p.y][p.x].to_float();
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            Position point = (p + Position{j, i}).mold(dimentions);
+            slice.push_back( (*auxiliar)[point.y][point.x] );
         }
     }
 
@@ -234,12 +235,23 @@ std::vector<std::vector<float>> Board::getSensorialData (
 }
 
 Cell Board::get_cell(const Position p) const {
-    return (*matrix)[p.y][p.x];
+    #ifdef RELEASE
+        return *matrix[p.y][p.x] = cell;
+    #else
+        if (p.x >= width || p.y >= height) {
+            endwin();
+            std::ostringstream errorStream;
+            errorStream << "Point (" << p.x << ", " << p.y << ") is outside of board (" << width << ", " << height << ")";
+            throw std::runtime_error(errorStream.str());
+        }
+        return (*matrix)[p.y % height][p.x % width];
+    #endif
 }
 
 void Board::set_cursor (const Position p, const char type, const bool put) {
     if (cursor_position != p) {
-        mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_is_over.character | COLOR_PAIR(cursor_is_over.colorPair));
+        if (scr_active) mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_is_over.character | COLOR_PAIR(cursor_is_over.colorPair));
+        else mvaddch(1 + cursor_position.y, 1 + cursor_position.x, ' ' | COLOR_PAIR(0));
         cursor_is_over = get_cell(p);
     };
 
@@ -257,4 +269,25 @@ void Board::set_cursor (const Position p, const char type, const bool put) {
         cursor_is_over = Cell('6', 1);
         setcell(p, cursor_is_over);
     }
+}
+
+
+Position Board::rand_empty_position (unsigned long seed) {
+    int w = (int)width; // Minimum value
+    int h = (int)height; 
+
+    std::mt19937 gen(seed);
+    std::uniform_int_distribution<int> dis_width (0, w);
+    std::uniform_int_distribution<int> dis_height (0, h);
+
+    int search_count = 100;
+    while (0 < search_count--) {
+        int x = dis_width(gen);
+        int y = dis_height(gen);
+        Position p = Position{x, y};
+
+        if (!isSolidAt(p)) return p;
+    }
+
+    return Position{0, 0};
 }

@@ -12,9 +12,13 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     //delta_time = 1.0;
 
     // Generate snakes here using the provided population_size
-    for (unsigned i = 0; i < 1 /*population_size*/; ++i) {
+    for (unsigned i = 0; i < population_size; ++i) {
         unsigned long snakeSeed = dis(gen);
-        agents.emplace_back(Snake(snakeSeed, Position{5, 5}, 7));
+
+        //ColorPair color = 1 + dis(gen) % 10;
+
+        Position p = board.rand_empty_position(snakeSeed);
+        agents.emplace_back(Snake(snakeSeed, p, 7));
     }
 
     running = true;

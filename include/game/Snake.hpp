@@ -5,14 +5,21 @@
 #include <cstdio>
 #include <random>
 
-#include "types.hpp"
 #include "Board.hpp"
+#include "Genome.hpp"
 
-#define GENE_SIZE (10)
+#include "types.hpp"
+#include "utils.hpp"
+
+//#define GENE_SIZE (10)
 
 class Snake {
     public:
-        Snake(unsigned long seed, Position initial, unsigned short start_lenght);
+        Snake(
+            unsigned long seed, 
+            Position initial, 
+            unsigned short start_lenght
+        );
         ~Snake () {};
 
         ColorPair colorPair;
@@ -29,9 +36,11 @@ class Snake {
         bool moved;
         void die (Board& board);
         unsigned short lenght;
-        std::vector<float> genes;
+        //std::vector<float> genes;
         Direction facing;
         std::mt19937 gen;
+
+        Genome genome;
         
         float speed;
         float movement;

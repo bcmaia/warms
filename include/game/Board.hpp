@@ -10,6 +10,7 @@
 #include <memory>
 #include <stdexcept>
 #include <sstream>
+#include <random>
 
 #include "types.hpp"
 
@@ -37,16 +38,15 @@ class Board {
             endwin(); // Terminate ncurses mode and clean up resources
         }
 
-        void toggle_screen_active() {
-            scr_active = !scr_active;
-        }
+        void toggle_screen_active();
 
-        std::vector<std::vector<float>> getSensorialData(unsigned short x, unsigned short y);
+        vectorf32 get_sensorial_data (Position p);
         Position trueCoords (const Position p) const; 
 
         bool compare (const Position point, const char c) const;
         void set_cursor (const Position p, const char type, const bool put);
         Cell get_cell(const Position p) const;
+        Position rand_empty_position (unsigned long seed);
 
     private:
         float delta_time;
@@ -56,6 +56,7 @@ class Board {
         Cell cursor_is_over;
         char cursor_type;
 
+        Position dimentions;
         unsigned short width;
         unsigned short height;
 

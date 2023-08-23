@@ -1,21 +1,28 @@
 #include "Snake.hpp"
 
 
-Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned short start_lenght = 3) : genes(GENE_SIZE), gen(seed) {
+Snake::Snake(
+    unsigned long seed, 
+    Position initial = Position{0, 0}, 
+    unsigned short start_lenght = 3
+) : genome(seed), gen(seed) {
     // Initialize genes with random values
     std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
+    //std::uniform_int_distribution<int> dis(-1000, 1000.0);
 
-    for (size_t i = 0; i < GENE_SIZE; ++i) {
-        genes[i] = dis(gen);
-    }
+    // for (size_t i = 0; i < GENE_SIZE; ++i) {
+    //     genes[i] = dis(gen);
+    // }
 
     moved = false;
     alive = true;
-    facing = Direction::Right;
+    float r = dis(gen);
+    facing = static_cast<Direction>(static_cast<unsigned>(r) % 4);
 
     //body.reserve(8);
     lenght = start_lenght;
-    colorPair = 4;
+    r = dis(gen);
+    colorPair = 1 + static_cast<unsigned>(r) % 14;
     body.emplace_back(initial);
 
     speed = 0.01;
@@ -34,7 +41,35 @@ void Snake::die (Board& board) {
 }
 
 void Snake::think(Board& board) {
-    facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
+    vectorf32 sensorial_input = board.get_sensorial_data(body.front());
+    
+
+    // endwin();
+    // printf("< sensorial input size [%ld] >", sensorial_input.size());
+    // exit(1);
+
+    // sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
+
+    vectorf32 decision_vec = genome.think(sensorial_input);
+    
+    int biggest = 0;
+
+    for (int i = 0; i < decision_vec.size(); i++) {
+        if (decision_vec[i] > decision_vec[biggest]) biggest = i;
+    }
+
+    switch (biggest) {
+        case 0: 
+            facing = rotate(facing, false);
+            break;
+        // case 1:
+        //     break;
+        case 2: 
+            facing = rotate(facing, true);
+            break;
+    }
+
+    //facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
 }
 
 void Snake::move(Board& board, float deltaTime) {
