@@ -28,6 +28,8 @@ Board::Board() {
         height, std::vector<Cell>(width, Cell{' ', 1})
     );
 
+    dimentions = Position(width, height);
+
     atexit(Board::cleanupNcurses);
 }
 
@@ -234,3 +236,5 @@ std::vector<std::vector<float>> Board::getSensorialData (
 
     return slice;
 }
+
+
