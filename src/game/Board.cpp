@@ -1,5 +1,19 @@
 #include "Board.hpp"
 
+void initColorPairs() {
+    if (has_colors() && COLOR_PAIRS >= 16) {
+        // Initialize color pairs with black background
+        for (int i = 0; i < 16; ++i) {
+            init_pair(i + 1, COLOR_BLACK, i);
+        }
+    } else {
+        throw std::runtime_error("Not enough color support!\n");
+    }
+
+    refresh();
+}
+
+
 Board::Board() {
     setenv("LANG", "en_US.UTF-8", 1);
 
@@ -11,7 +25,8 @@ Board::Board() {
     nodelay(stdscr, TRUE);
 
     start_color();
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    //init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    initColorPairs();
 
     int maxX, maxY;
     getmaxyx(stdscr, maxY, maxX);
@@ -24,8 +39,9 @@ Board::Board() {
         height, std::vector<Cell>(width, Cell{' ', 1})
     );
 
-    auxiliar = std::make_unique<std::vector<std::vector<Cell>>>(
-        height, std::vector<Cell>(width, Cell{' ', 1})
+    float empty_cell_float_value = Cell{' ', 1}.to_float();
+    auxiliar = std::make_unique<std::vector<std::vector<float>>>(
+        height, std::vector<float>(width, empty_cell_float_value)
     );
 
     atexit(Board::cleanupNcurses);
@@ -61,8 +77,9 @@ void printStackTrace() {
     
 void Board::setcell(Position point, Cell cell) {
     #ifdef RELEASE
+        *auxiliar[point.y][point.x] = cell.to_float();
         *matrix[point.y][point.x] = cell;
-        *auxiliar[point.y][point.x] = cell;
+
     #else
         if (point.x >= width || point.y >= height) {
             endwin();
@@ -70,9 +87,11 @@ void Board::setcell(Position point, Cell cell) {
             errorStream << "Point (" << point.x << ", " << point.y << ") is outside of board (" << width << ", " << height << ")";
             throw std::runtime_error(errorStream.str());
         }
+        (*auxiliar)[point.y % height][point.x % width] = cell.to_float();
         (*matrix)[point.y % height][point.x % width] = cell;
-        (*auxiliar)[point.y % height][point.x % width] = cell;
     #endif
+
+    if (scr_active) mvaddch(1 + point.y, 1 + point.x, cell.character | COLOR_PAIR(cell.colorPair));
 }
 
 
@@ -112,14 +131,15 @@ void Board::render_static () const {
             mvaddch(1 + y, 1 + x, cell.character | COLOR_PAIR(cell.colorPair));
         }
     }
-
-    mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_type | COLOR_PAIR(1));
 }
 
 void Board::render () {
     drawOutline(width + 2, height + 2);
 
-    if (scr_active) {render_static ();}
+    //if (scr_active) {render_static ();}
+
+    // Render cursor
+    mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_type | COLOR_PAIR(1));
 
     display_delta_time ();
 
@@ -132,7 +152,8 @@ void Board::render () {
 void Board::reset () {
     for (size_t i = 0; i < height; i++) {
         for (size_t j = 0; j < width; j++) {
-            (*auxiliar)[i][j] = Cell{' ', 0};
+            (*matrix)[i][j] = Cell{' ', 0};
+            (*auxiliar)[i][j] = Cell{' ', 0}.to_float();
         }
     }
 }
@@ -187,23 +208,6 @@ bool Board::compare (const Position point, const char c) const {
 }
 
 
-// bool Board::isSolidAt (Position point) const {
-//     std::vector<std::vector<cell>> subarray(5, std::vector<cell>(5));
-
-//     int matrixWidth = matrix[0].size();
-//     int matrixHeight = matrix.size();
-
-//     for (int i = -2; i <= 2; ++i) {
-//         for (int j = -2; j <= 2; ++j) {
-//             int rowIndex = (x + i + matrixHeight) % matrixHeight;
-//             int colIndex = (y + j + matrixWidth) % matrixWidth;
-//             subarray[i + 2][j + 2] = matrix[rowIndex][colIndex];
-//         }
-//     }
-
-//     return subarray;
-// }
-
 Position Board::trueCoords (const Position p) const {
     return Position {
         p.x % width,
@@ -222,7 +226,7 @@ std::vector<std::vector<float>> Board::getSensorialData (
         for (int j = -2; j <= 2; ++j) {
             Position p = trueCoords( Position{x + i, y + j} );
 
-            slice[i + 2][j + 2] = cell_map( (*matrix)[p.y][p.x] );
+            slice[i + 2][j + 2] = (*matrix)[p.y][p.x].to_float();
         }
     }
 
@@ -234,6 +238,11 @@ Cell Board::get_cell(const Position p) const {
 }
 
 void Board::set_cursor (const Position p, const char type, const bool put) {
+    if (cursor_position != p) {
+        mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_is_over.character | COLOR_PAIR(cursor_is_over.colorPair));
+        cursor_is_over = get_cell(p);
+    };
+
     cursor_position = p;
     cursor_type = type;
 
@@ -242,8 +251,10 @@ void Board::set_cursor (const Position p, const char type, const bool put) {
     char current = get_cell(p).character;
 
     if ('#' == type) {
-        setcell(p, '#' == current ? Cell{' ', 0} : Cell{'#', 1});
+        cursor_is_over = '#' == current ? Cell{' ', 0} : Cell{'#', 1};
+        setcell(p, cursor_is_over);
     } else if ('X' == type) {
-        setcell(p, Cell{'6', 1});
+        cursor_is_over = Cell('6', 1);
+        setcell(p, cursor_is_over);
     }
 }

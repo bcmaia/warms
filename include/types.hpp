@@ -8,9 +8,15 @@
 
 typedef unsigned char ColorPair;
 
-struct Cell {
-    unsigned char character;
-    ColorPair colorPair;
+class Cell {
+    public:
+        unsigned char character;
+        unsigned char colorPair;
+
+        Cell () : character(' '), colorPair(1) {};
+        Cell(const unsigned char c, const unsigned char cell_color) : character(c), colorPair(cell_color) {};
+
+        float to_float () const;
 };
 
 class Position {
@@ -33,6 +39,8 @@ class Position {
         Position operator+(const Position& other) const;
         Position operator+(const int other) const;
         Position operator-(const Position& other) const;
+        bool operator==(const Position& other) const;
+        bool operator!=(const Position& other) const;
 };
 
 enum class Direction : uint8_t {

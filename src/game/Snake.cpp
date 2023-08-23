@@ -15,7 +15,7 @@ Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned sho
 
     //body.reserve(8);
     lenght = start_lenght;
-    colorPair = 1;
+    colorPair = 4;
     body.emplace_back(initial);
 
     speed = 0.01;
@@ -72,12 +72,11 @@ void Snake::move(Board& board, float deltaTime) {
     }
 }
 
-constexpr Cell DEAD_CELL = Cell{' ', 0};
 
 void Snake::shed_dead_cell (Board& board) {
     if (dead_cell.has_value()) {
-        board.setcell(dead_cell.unwrap(), DEAD_CELL);
-        board.setcell(body.back(), Cell{'+', colorPair});
+        board.setcell(dead_cell.unwrap(), Cell(' ', 0));
+        board.setcell(body.back(), Cell('+', colorPair));
         dead_cell.clear();
     }
 }

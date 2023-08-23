@@ -20,11 +20,14 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     running = true;
 }
 
-void Game::process_inputs(int& x, int& y, char& type) {
+void Game::process_inputs(int& x, int& y, char& type, bool& fast) {
     int ch = getch();
 
     if ('q' == ch) {
         running = false;
+    } else if ('l' == ch) {
+        board.toggle_screen_active();
+        fast = !fast;
     } else if ('\n' == ch) {
         board.set_cursor(Position(x, y), type, true);
     } else if ('\t' == ch) {
@@ -60,6 +63,13 @@ void Game::handle_physics(float delta_time) {
     }
 }
 
+void Game::process_thought() {
+    for (size_t i = 0; i < agents.size(); i++) {
+        Snake& snake = agents[i];
+        snake.think(board);
+    }
+}
+
 void Game::render_agents() {
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
@@ -89,6 +99,7 @@ void Game::run() {
 
     int x = 0, y = 0;
     char type = 'X';
+    bool fast = false;
 
     // Calculate desired frame duration for 100 fps
     constexpr double max_fps = 100;
@@ -107,7 +118,7 @@ void Game::run() {
     while (running) {
         // auto frameStart = Clock::now();
 
-        process_inputs(x, y, type);
+        process_inputs(x, y, type, fast);
 
         // board.pri(
         //     Position{static_cast<short unsigned int>(x), static_cast<short unsigned int>(y)},
@@ -115,14 +126,16 @@ void Game::run() {
         // );
 
         // Simulation
-        double delta_time = timer.get_delta_time();
+        double delta_time = fast ? min_delta_time : timer.get_delta_time();
         handle_physics( delta_time );
 
         // Rendering
         
         /*if (10000 > count++) render_agents_setup();
-        else */render_agents();
-        board.set_delta_time( delta_time );
+        else */
+        process_thought();
+        render_agents();
+        board.set_delta_time( timer.get_delta_time() );
         board.render();
         //board.displayValue( timer.get_delta_time() * SECONDS_TO_MILISECONDS );
 
@@ -130,8 +143,7 @@ void Game::run() {
         //std::chrono::duration<double> frameTime = frameEnd - frameStart;
 
         timer.measure_time();
-        timer.sync(min_delta_time);
-
+        if (!fast) {timer.sync(min_delta_time);}
         // // Calculate sleep duration to maintain desired frame rate
         // std::chrono::duration<double> sleepDuration = frameDuration - delta_time;
         // if (sleepDuration > std::chrono::duration<double>(0)) {

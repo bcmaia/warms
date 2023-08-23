@@ -53,15 +53,16 @@ class Board {
         bool scr_active;
 
         Position cursor_position;
+        Cell cursor_is_over;
         char cursor_type;
 
         unsigned short width;
         unsigned short height;
 
         std::unique_ptr<std::vector<std::vector<Cell>>> matrix;
-        std::unique_ptr<std::vector<std::vector<Cell>>> auxiliar;
+        std::unique_ptr<std::vector<std::vector<float>>> auxiliar;
 
-        void swap() {std::swap(matrix, auxiliar);};
+        //void swap() {std::swap(matrix, auxiliar);};
         void reset ();
         void display_delta_time () const;
 };

@@ -6,6 +6,7 @@ constexpr double MIN_DELTA_TIME = 0.001; // In seconds
 
 class Timer {
     private:
+        std::chrono::high_resolution_clock::time_point start_time;
         std::chrono::high_resolution_clock::time_point old_time;
         std::chrono::high_resolution_clock::time_point new_time;
         double delta_time;
@@ -14,6 +15,7 @@ class Timer {
         Timer() {
             old_time = std::chrono::high_resolution_clock::now();
             new_time = old_time;
+            start_time = old_time;
             delta_time = 1.0; // Starts at one second
         }
 

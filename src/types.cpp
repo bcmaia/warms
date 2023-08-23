@@ -7,9 +7,9 @@ std::unordered_map<int, int> colorMap;
 constexpr float CELL_MAP_COLOR_FACTOR = 1.0 / 16.0;
 constexpr float CELL_MAP_NORMALIZATION = 1.0 / (255.0 + 255.0 * CELL_MAP_COLOR_FACTOR);
 
-float cell_map (const Cell cell) {
-    float char_value = static_cast<float>(cell.character);
-    float color_value = static_cast<float>(cell.colorPair);
+float Cell::to_float () const {
+    float char_value = static_cast<float>(character);
+    float color_value = static_cast<float>(colorPair);
 
     return CELL_MAP_NORMALIZATION * (char_value + CELL_MAP_COLOR_FACTOR * color_value);
 }
@@ -57,4 +57,14 @@ Position Position::operator+(const int other) const {
 // Overloading - operator for position subtraction
 Position Position::operator-(const Position& other) const {
     return Position(x - other.x, y - other.y);
+}
+
+// Overloading - operator for position subtraction
+bool Position::operator==(const Position& other) const {
+    return (x == other.x) && (y == other.y);
+}
+
+// Overloading - operator for position subtraction
+bool Position::operator!=(const Position& other) const {
+    return (x != other.x) || (y != other.y);
 }
