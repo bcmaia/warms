@@ -44,9 +44,16 @@ class Board {
         std::vector<std::vector<float>> getSensorialData(unsigned short x, unsigned short y);
         Position trueCoords (const Position p) const; 
 
+        bool compare (const Position point, const char c) const;
+        void set_cursor (const Position p, const char type, const bool put);
+        Cell get_cell(const Position p) const;
+
     private:
         float delta_time;
         bool scr_active;
+
+        Position cursor_position;
+        char cursor_type;
 
         unsigned short width;
         unsigned short height;

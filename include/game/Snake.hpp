@@ -18,7 +18,7 @@ class Snake {
         ColorPair colorPair;
         std::deque<Position> body;
 
-        void move(const Board& board, float deltaTime);
+        void move(Board& board, float deltaTime);
         void think(Board& board);
         void shed_dead_cell (Board& board);
         void show_new_cell (Board& board);
@@ -27,7 +27,7 @@ class Snake {
 
     private:
         bool moved;
-        void die ();
+        void die (Board& board);
         unsigned short lenght;
         std::vector<float> genes;
         Direction facing;

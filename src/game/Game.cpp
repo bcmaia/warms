@@ -20,13 +20,15 @@ Game::Game(unsigned long seed, unsigned population_size) : board() {
     running = true;
 }
 
-void Game::process_inputs(int& x, int& y) {
+void Game::process_inputs(int& x, int& y, char& type) {
     int ch = getch();
 
     if ('q' == ch) {
         running = false;
-    } else if ('l' == ch) {
-        board.toggle_screen_active();
+    } else if ('\n' == ch) {
+        board.set_cursor(Position(x, y), type, true);
+    } else if ('\t' == ch) {
+        type = '#' == type ? 'X' : '#';
     } else if (ch == KEY_UP && y > 0) {
         y--;
     } else if (ch == KEY_DOWN && y < board.getHeight() - 1) {
@@ -36,6 +38,8 @@ void Game::process_inputs(int& x, int& y) {
     } else if (ch == KEY_RIGHT && x < board.getWidth() - 1) {
         x++;
     }
+
+    board.set_cursor(Position(x, y), type, false);
 }
 
 
@@ -84,6 +88,7 @@ void Game::run() {
     //========================================================================//
 
     int x = 0, y = 0;
+    char type = 'X';
 
     // Calculate desired frame duration for 100 fps
     constexpr double max_fps = 100;
@@ -102,12 +107,12 @@ void Game::run() {
     while (running) {
         // auto frameStart = Clock::now();
 
-        process_inputs(x, y);
+        process_inputs(x, y, type);
 
-        board.setcell(
-            Position{static_cast<short unsigned int>(x), static_cast<short unsigned int>(y)},
-            Cell{'X', 1}
-        );
+        // board.pri(
+        //     Position{static_cast<short unsigned int>(x), static_cast<short unsigned int>(y)},
+        //     Cell{'X', 1}
+        // );
 
         // Simulation
         double delta_time = timer.get_delta_time();

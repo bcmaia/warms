@@ -25,15 +25,19 @@ Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned sho
     // Example: initialize body, length, facing, etc.
 }
 
-void Snake::die () {
+void Snake::die (Board& board) {
     alive = false;
+
+    for (const Position &p : body) {
+        board.setcell(p, Cell{'&', colorPair});
+    }
 }
 
 void Snake::think(Board& board) {
     facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
 }
 
-void Snake::move(const Board& board, float deltaTime) {
+void Snake::move(Board& board, float deltaTime) {
     // If we are alive
     if (!alive) return;
 
@@ -45,11 +49,17 @@ void Snake::move(const Board& board, float deltaTime) {
     // Calculate new head
     neck = body.front();
     Position new_point = board.movement(body.front(), facing, 1);
-    
 
     // Check for colision
-    // alive = board.isSolidAt(new_point);
-    // if (!alive) return;
+    if (board.isSolidAt(new_point)) {
+        die(board); 
+        return;
+    }
+
+    // Check for berries
+    if (board.compare(new_point, '&') || board.compare(new_point, '6')) {
+        lenght++;
+    }
 
     // Add new cell
     body.push_front(new_point);

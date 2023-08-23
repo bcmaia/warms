@@ -112,6 +112,8 @@ void Board::render_static () const {
             mvaddch(1 + y, 1 + x, cell.character | COLOR_PAIR(cell.colorPair));
         }
     }
+
+    mvaddch(1 + cursor_position.y, 1 + cursor_position.x, cursor_type | COLOR_PAIR(1));
 }
 
 void Board::render () {
@@ -172,7 +174,16 @@ Position Board::movement (Position point, Direction dir, unsigned short amount =
 
 
 bool Board::isSolidAt (Position point) const {
-    return 'X' == (*matrix)[point.y][point.x].character;
+    return (
+        ('*' == (*matrix)[point.y][point.x].character)
+        || ('@' == (*matrix)[point.y][point.x].character)
+        || ('+' == (*matrix)[point.y][point.x].character)
+        || ('#' == (*matrix)[point.y][point.x].character)
+    );
+}
+
+bool Board::compare (const Position point, const char c) const {
+    return c == (*matrix)[point.y][point.x].character;
 }
 
 
@@ -216,4 +227,23 @@ std::vector<std::vector<float>> Board::getSensorialData (
     }
 
     return slice;
+}
+
+Cell Board::get_cell(const Position p) const {
+    return (*matrix)[p.y][p.x];
+}
+
+void Board::set_cursor (const Position p, const char type, const bool put) {
+    cursor_position = p;
+    cursor_type = type;
+
+    if (!put) return;
+
+    char current = get_cell(p).character;
+
+    if ('#' == type) {
+        setcell(p, '#' == current ? Cell{' ', 0} : Cell{'#', 1});
+    } else if ('X' == type) {
+        setcell(p, Cell{'6', 1});
+    }
 }

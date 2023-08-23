@@ -26,7 +26,7 @@ class Game {
         std::mt19937 gen;
 
         void measure_time();
-        void process_inputs(int& x, int& y);
+        void process_inputs(int& x, int& y, char& type);
         void calculate_decisions();
         void handle_physics(float delta_time);
         void render_agents();
