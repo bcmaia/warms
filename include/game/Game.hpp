@@ -15,6 +15,8 @@ class Game {
         void run();
         
     private:
+        void render_agents_setup();
+
         float time_factor;
         bool running;
         Timer timer;

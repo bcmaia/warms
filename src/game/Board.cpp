@@ -61,6 +61,7 @@ void printStackTrace() {
     
 void Board::setcell(Position point, Cell cell) {
     #ifdef RELEASE
+        *matrix[point.y][point.x] = cell;
         *auxiliar[point.y][point.x] = cell;
     #else
         if (point.x >= width || point.y >= height) {
@@ -69,6 +70,7 @@ void Board::setcell(Position point, Cell cell) {
             errorStream << "Point (" << point.x << ", " << point.y << ") is outside of board (" << width << ", " << height << ")";
             throw std::runtime_error(errorStream.str());
         }
+        (*matrix)[point.y % height][point.x % width] = cell;
         (*auxiliar)[point.y % height][point.x % width] = cell;
     #endif
 }
@@ -121,8 +123,8 @@ void Board::render () {
 
     refresh();
 
-    swap();
-    reset();
+    //swap();
+    //reset();
 }
 
 void Board::reset () {

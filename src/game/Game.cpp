@@ -59,14 +59,24 @@ void Game::handle_physics(float delta_time) {
 void Game::render_agents() {
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
-
-        for (const Position& position : snake.body)  {
-            board.setcell(position, Cell{'*', snake.colorPair});
-        }
-        board.setcell(snake.body.front(), Cell{'@', snake.colorPair});
-        board.setcell(snake.body.back(), Cell{'+', snake.colorPair});
+        snake.shed_dead_cell(board);
     }
+
+    for (size_t i = 0; i < agents.size(); i++) {
+        Snake& snake = agents[i];
+        snake.show_new_cell(board);
+    }
+
 }
+
+void Game::render_agents_setup() {
+    for (size_t i = 0; i < agents.size(); i++) {
+        Snake& snake = agents[i];
+        snake.render(board);
+    }
+
+}
+
 
 void Game::run() {
     //========================================================================//
@@ -87,6 +97,8 @@ void Game::run() {
     //========================================================================//
     //=================|    GAME LOOP    |====================================//
     //========================================================================//
+    int count = 0;
+
     while (running) {
         // auto frameStart = Clock::now();
 
@@ -102,7 +114,9 @@ void Game::run() {
         handle_physics( delta_time );
 
         // Rendering
-        render_agents();
+        
+        /*if (10000 > count++) render_agents_setup();
+        else */render_agents();
         board.set_delta_time( delta_time );
         board.render();
         //board.displayValue( timer.get_delta_time() * SECONDS_TO_MILISECONDS );

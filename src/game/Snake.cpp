@@ -9,6 +9,7 @@ Snake::Snake(unsigned long seed, Position initial = Position{0, 0}, unsigned sho
         genes[i] = dis(gen);
     }
 
+    moved = false;
     alive = true;
     facing = Direction::Right;
 
@@ -28,39 +29,75 @@ void Snake::die () {
     alive = false;
 }
 
-Position Snake::check_colision(Board& board) {
+void Snake::think(Board& board) {
     facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
-
-    Position new_point = board.movement(body.front(), facing, 1);
-    //new_point.x += 1; // debug
-
-    // if (board.isSolidAt(new_point)) {
-    //     die();
-    // }
-
-    return new_point;
 }
 
-void Snake::move(Board& board, float deltaTime) {
+void Snake::move(const Board& board, float deltaTime) {
+    // If we are alive
+    if (!alive) return;
+
+    // If we have momentum
     movement += speed * deltaTime;
     if (1.0 > movement) return;
     movement--;
 
-    // if (!body.empty()) {
-    //     Position frontPos = body.front();
-    //     Position newPos = Position{1 + frontPos.x, frontPos.y};
-    //     body.push_front(newPos);
-    // }
+    // Calculate new head
+    neck = body.front();
+    Position new_point = board.movement(body.front(), facing, 1);
+    
 
-    // printf("Body[0].x = %d", (int)body.back().x);
+    // Check for colision
+    // alive = board.isSolidAt(new_point);
+    // if (!alive) return;
 
-    if (!alive) return;
-
-    Position new_point = check_colision(board);
+    // Add new cell
     body.push_front(new_point);
+    new_cell.set_value(new_point);
 
-    if (lenght < body.size() ) {
-        (void) body.pop_back();
+    // Remove tail
+    if (body.size() > lenght) {
+        dead_cell.set_value(body.back());
+        body.pop_back();
     }
+}
+
+constexpr Cell DEAD_CELL = Cell{' ', 0};
+
+void Snake::shed_dead_cell (Board& board) {
+    if (dead_cell.has_value()) {
+        board.setcell(dead_cell.unwrap(), DEAD_CELL);
+        board.setcell(body.back(), Cell{'+', colorPair});
+        dead_cell.clear();
+    }
+}
+
+void Snake::show_new_cell (Board& board) {
+    if (new_cell.has_value()) {
+        board.setcell(neck, Cell{'*', colorPair});
+        board.setcell(new_cell.unwrap(), Cell{'@', colorPair});
+        new_cell.clear();
+    }
+}
+
+void Snake::render (Board& board) {
+    for (const Position &p : body) {
+        board.setcell(p, Cell{'*', colorPair});
+    }
+
+    if (0 < body.size()) {
+        board.setcell(body.back(), Cell{'+', colorPair});
+        board.setcell(body.front(), Cell{'@', colorPair});
+    }
+}
+
+void Snake::survival_test(Board& board) {
+    if (!moved) return;
+
+    // If the board is solid at where we are going, we die.
+    alive = !board.isSolidAt(body.front());
+
+    // TODO: Handle death sequence
+    //...
 }
 
