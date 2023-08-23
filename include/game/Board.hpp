@@ -44,10 +44,6 @@ class Board {
         std::vector<std::vector<float>> getSensorialData(unsigned short x, unsigned short y);
         Position trueCoords (const Position p) const; 
 
-        Position interpolate (Position start, Position end, unsigned amount = 1) const;
-        void set_line(const Line& line, const Cell& cell);
-        void set_line(const Position& p1, const Position& p2, const Cell& cell);
-
     private:
         float delta_time;
         bool scr_active;

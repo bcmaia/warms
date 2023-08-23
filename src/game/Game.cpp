@@ -59,12 +59,12 @@ void Game::handle_physics(float delta_time) {
 void Game::render_agents() {
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
-        snake.shed_dead_cells(board);
-    }
 
-    for (size_t i = 0; i < agents.size(); i++) {
-        Snake& snake = agents[i];
-        snake.show_new_cells(board);
+        for (const Position& position : snake.body)  {
+            board.setcell(position, Cell{'*', snake.colorPair});
+        }
+        board.setcell(snake.body.front(), Cell{'@', snake.colorPair});
+        board.setcell(snake.body.back(), Cell{'+', snake.colorPair});
     }
 }
 
