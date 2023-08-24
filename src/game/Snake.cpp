@@ -22,6 +22,8 @@ Snake::Snake(
     facing = static_cast<Direction>(static_cast<unsigned>(r) % 4);
 
     //body.reserve(8);
+    state = 0;
+    fitness = 0;
     lenght = start_lenght;
     r = dis(gen);
     colorPair = 1 + static_cast<unsigned>(r) % 14;
@@ -51,7 +53,7 @@ Snake::Snake(
 ) : genome(parent1, parent2, seed), gen(seed) {
     // Initialize genes with random values
     std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
-    //std::uniform_int_distribution<int> dis(-1000, 1000.0);
+    // std::uniform_real_distribution<float> dis(-1000, 1000.0);
 
     // for (size_t i = 0; i < GENE_SIZE; ++i) {
     //     genes[i] = dis(gen);
@@ -96,21 +98,25 @@ void Snake::die (Board& board) {
 void Snake::think(Board& board) {
     vectorf32 sensorial_input = board.get_sensorial_data(body.front());
     
-
+    std::uniform_real_distribution<float> dis(-2.0, 2.0);
     // endwin();
     // printf("< sensorial input size [%ld] >", sensorial_input.size());
     // exit(1);
 
     sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
-    //sensorial_input.push_back( ((float)genome.colorPair) * (1.0 / 16.0) );
+    sensorial_input.push_back( dis(gen) );
+    sensorial_input.push_back( state );
 
     vectorf32 decision_vec = genome.think(sensorial_input);
+    state = decision_vec[3];
     
     int biggest = 0;
 
-    for (size_t i = 0; i < decision_vec.size(); i++) {
+    for (size_t i = 0; i < 3; i++) {
         if (decision_vec[i] > decision_vec[biggest]) biggest = i;
     }
+
+    oldFacing = facing;
 
     switch (biggest) {
         case 1: 
@@ -122,7 +128,6 @@ void Snake::think(Board& board) {
             facing = rotate(facing, true);
             break;
     }
-
     //facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
 }
 
@@ -155,7 +160,11 @@ void Snake::move(Board& board, float deltaTime) {
     // Check for berries
     if (board.compare(new_point, '&') || board.compare(new_point, '6')) {
         lenght++;
+        fitness += 1.0;
     }
+
+    fitness += deltaTime * 0.000001;
+    if (oldFacing != facing) {fitness += deltaTime * 1.0;}
 
     // Add new cell
     body.push_front(new_point);

@@ -46,6 +46,12 @@ Board::Board() {
     );
 
     atexit(Board::cleanupNcurses);
+
+    for (int i = 0; i < width; i++ ) {setcell(Position{i, 0}, Cell{'#', 1});}
+    for (int i = 0; i < height; i++ ) {setcell(Position{0, i}, Cell{'#', 1});}
+
+    for (int i = 0; i < width; i++ ) {setcell(Position{i, height - 1}, Cell{'#', 1});}
+    for (int i = 0; i < height; i++ ) {setcell(Position{width - 1, i}, Cell{'#', 1});}
 }
 
 Board::~Board() {

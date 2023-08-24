@@ -44,15 +44,19 @@ class Snake {
         // Genome get_genome() {return genome;}
         Genome genome;
 
+        float fitness;
         float time_alive;
         bool alive;
         unsigned short lenght;
     private:
+        float state;
+        
         // float time_alive;
         bool moved;
         void die (Board& board);
         
         // std::vector<float> genes;
+        Direction oldFacing;
         Direction facing;
         std::mt19937 gen;
         

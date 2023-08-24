@@ -18,7 +18,7 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
         //ColorPair color = 1 + dis(gen) % 10;
 
         Position p = board.rand_empty_position(snakeSeed);
-        agents.push_back(Snake(snakeSeed, p, 7));
+        agents.push_back(Snake(snakeSeed, p, 5));
     }
 
     running = true;
@@ -73,7 +73,7 @@ void Game::reproduce() {
             std::size_t index2 = index_dist(gen);
 
             Snake& parent1 = (
-                agents[index1].time_alive + agents[index1].lenght > agents[index2].time_alive + agents[index2].lenght
+                agents[index1].fitness > agents[index2].fitness
                 ? agents[index1] 
                 : agents[index2]
             );
@@ -82,7 +82,7 @@ void Game::reproduce() {
             index2 = index_dist(gen);
 
             Snake& parent2 = (
-                agents[index1].time_alive + agents[index1].lenght > agents[index2].time_alive + agents[index2].lenght
+                agents[index1].fitness > agents[index2].fitness
                 ? agents[index1] 
                 : agents[index2]
             );
@@ -195,7 +195,7 @@ void Game::run() {
     //========================================================================//
     //int count = 0;
 
-    constexpr double cleaner_factor = 5000.0;
+    constexpr double cleaner_factor = 3000.0;
     double cleaner_timer = 0;
 
     while (running) {

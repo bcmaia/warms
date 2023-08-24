@@ -6,7 +6,7 @@ int main() {
 
     // return 0;
     // //unsigned long seed = 1;
-    unsigned population_size = 20;
+    unsigned population_size = 33;
 
     std::random_device rd;  // Obtain a random seed from hardware
     std::mt19937_64 eng(rd());  // Seed the random number generator

@@ -5,7 +5,7 @@ std::unordered_map<char, int> charMap;
 std::unordered_map<int, int> colorMap;
 
 constexpr float CELL_MAP_COLOR_FACTOR = 1.0 / 16.0;
-constexpr float CELL_MAP_NORMALIZATION = 1.0 / (255.0 + 255.0 * CELL_MAP_COLOR_FACTOR);
+constexpr float CELL_MAP_NORMALIZATION = 1.0 / (64);
 
 float Cell::to_float () const {
     float char_value = static_cast<float>(character);

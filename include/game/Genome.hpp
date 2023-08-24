@@ -11,8 +11,9 @@
 #include <stdexcept>
 
 
-
+#define OUTPUT_SIZE (4)
 #define MIND_SIZE (10)
+#define MUTATION_RATE (0.05)
 
 
 class Genome {
@@ -25,8 +26,8 @@ class Genome {
 
         Genome(unsigned long seed) {
             // Constructor to initialize the matrix and vector
-            mind_factor = generateRandomMatrix(3, MIND_SIZE, seed);
-            mind_addends = generateRandomVector(3, seed);
+            mind_factor = generateRandomMatrix(OUTPUT_SIZE, MIND_SIZE, seed);
+            mind_addends = generateRandomVector(OUTPUT_SIZE, seed);
 
             colorPair = 10;
         }
@@ -38,7 +39,7 @@ class Genome {
             std::bernoulli_distribution mutateDist(mutationProbability);
             std::bernoulli_distribution mutationTypeDist(0.5);
 
-            for (size_t i = 0; i < 3; ++i) {
+            for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
                 for (size_t j = 0; j < MIND_SIZE; ++j) {
                     if (mutateDist(gen)) {
                         if (mutationTypeDist(gen))
@@ -65,10 +66,10 @@ class Genome {
             std::mt19937 gen(seed);
             std::uniform_int_distribution<size_t> dis(0, 1); // 0 or 1 randomly
 
-            mind_factor = matrixf32(3, vectorf32(MIND_SIZE, 0.0));
-            mind_addends = vectorf32(3, 0.0);
+            mind_factor = matrixf32(OUTPUT_SIZE, vectorf32(MIND_SIZE, 0.0));
+            mind_addends = vectorf32(OUTPUT_SIZE, 0.0);
 
-            for (size_t i = 0; i < 3; ++i) {
+            for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
                 for (size_t j = 0; j < MIND_SIZE; ++j) {
                     mind_factor[i][j] = (1 == dis(gen)) ? parent1.mind_factor[i][j] : parent2.mind_factor[i][j];
                 }
@@ -77,18 +78,18 @@ class Genome {
 
             colorPair = (1 == dis(gen)) ? parent1.colorPair : parent2.colorPair;
 
-            mutate(0.035, seed);
+            mutate(MUTATION_RATE, seed);
         }
 
         vectorf32 think (const vectorf32& sensorial_input) {
-            vectorf32 result(3);
+            vectorf32 result(OUTPUT_SIZE);
             
             #ifndef RELEASE
                 if (
-                    mind_factor.size() != 3 
+                    mind_factor.size() != OUTPUT_SIZE
                     || mind_factor[0].size() != MIND_SIZE
                     || sensorial_input.size() != MIND_SIZE 
-                    || mind_addends.size() != 3
+                    || mind_addends.size() != OUTPUT_SIZE
                 ) {
                     throw std::runtime_error(
                         "Sizes don't match: mind_factor[" + std::to_string(mind_factor.size()) 
@@ -102,7 +103,7 @@ class Genome {
                 }
             #endif
 
-            for (size_t i = 0; i < 3; ++i) {
+            for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
                 for (size_t j = 0; j < MIND_SIZE; ++j) {
                     result[i] += mind_factor[i][j] * sensorial_input[j] + mind_addends[i];
                 }
