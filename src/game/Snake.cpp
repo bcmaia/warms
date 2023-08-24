@@ -102,18 +102,18 @@ void Snake::think(Board& board) {
     // exit(1);
 
     sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
-    sensorial_input.push_back( ((float)genome.colorPair) * (1.0 / 16.0) );
+    //sensorial_input.push_back( ((float)genome.colorPair) * (1.0 / 16.0) );
 
     vectorf32 decision_vec = genome.think(sensorial_input);
     
     int biggest = 0;
 
-    for (int i = 0; i < decision_vec.size(); i++) {
+    for (size_t i = 0; i < decision_vec.size(); i++) {
         if (decision_vec[i] > decision_vec[biggest]) biggest = i;
     }
 
     switch (biggest) {
-        case 0: 
+        case 1: 
             facing = rotate(facing, false);
             break;
         // case 1:

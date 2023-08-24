@@ -12,7 +12,7 @@
 
 
 
-#define MIND_SIZE (27)
+#define MIND_SIZE (10)
 
 
 class Genome {
@@ -33,7 +33,8 @@ class Genome {
 
         void mutate(float mutationProbability, unsigned long seed) {
             std::mt19937 gen(seed);
-            std::uniform_real_distribution<float> dis(-1.0, 1.0);
+            std::uniform_real_distribution<float> dis2(-3.0, 3.0);
+            std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
             std::bernoulli_distribution mutateDist(mutationProbability);
             std::bernoulli_distribution mutationTypeDist(0.5);
 
@@ -43,14 +44,14 @@ class Genome {
                         if (mutationTypeDist(gen))
                             mind_factor[i][j] = dis(gen);
                         else
-                            mind_factor[i][j] *= dis(gen);
+                            mind_factor[i][j] *= dis2(gen);
                     }
                 }
                 if (mutateDist(gen)) {
                     if (mutationTypeDist(gen))
                         mind_addends[i] = dis(gen);
                     else
-                        mind_addends[i] *= dis(gen);
+                        mind_addends[i] *= dis2(gen);
                 }
 
                 if (mutateDist(gen)) {
@@ -76,7 +77,7 @@ class Genome {
 
             colorPair = (1 == dis(gen)) ? parent1.colorPair : parent2.colorPair;
 
-            mutate(0.05, seed);
+            mutate(0.035, seed);
         }
 
         vectorf32 think (const vectorf32& sensorial_input) {
@@ -103,7 +104,7 @@ class Genome {
 
             for (size_t i = 0; i < 3; ++i) {
                 for (size_t j = 0; j < MIND_SIZE; ++j) {
-                    result[i] += mind_factor[i][j] * mind_addends[j] + mind_addends[i];
+                    result[i] += mind_factor[i][j] * sensorial_input[j] + mind_addends[i];
                 }
             }
 

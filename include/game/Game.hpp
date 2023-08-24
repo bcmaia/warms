@@ -17,6 +17,9 @@ class Game {
         void run();
         
     private:
+        std::mt19937 gen;
+
+        Board board;
         int population_size;
         void render_agents_setup();
 
@@ -24,9 +27,9 @@ class Game {
         bool running;
         Timer timer;
 
-        Board board;
+        
         std::vector<Snake> agents;
-        std::mt19937 gen;
+        
 
         void measure_time();
         void process_inputs(int& x, int& y, char& type, bool& fast);

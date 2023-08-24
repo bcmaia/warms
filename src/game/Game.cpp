@@ -164,8 +164,9 @@ void Game::run_simulation(float delta_time) {
         snake.show_new_cell(board);
     };
 
-    std::for_each(std::execution::par, agents.begin(), agents.end(), handle_physics_func);
+
     std::for_each(std::execution::par, agents.begin(), agents.end(), process_thought_func);
+    std::for_each(std::execution::par, agents.begin(), agents.end(), handle_physics_func);
     std::for_each(std::execution::par, agents.begin(), agents.end(), render_shed_func);
     std::for_each(std::execution::par, agents.begin(), agents.end(), render_new_cells_func);
 }
@@ -192,9 +193,9 @@ void Game::run() {
     //========================================================================//
     //=================|    GAME LOOP    |====================================//
     //========================================================================//
-    int count = 0;
+    //int count = 0;
 
-    constexpr double cleaner_factor = 10000.0;
+    constexpr double cleaner_factor = 5000.0;
     double cleaner_timer = 0;
 
     while (running) {

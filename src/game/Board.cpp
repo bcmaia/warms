@@ -4,7 +4,7 @@ void initColorPairs() {
     if (has_colors() && COLOR_PAIRS >= 16) {
         // Initialize color pairs with black background
         for (int i = 0; i < 16; ++i) {
-            init_pair(i + 1, COLOR_BLACK, i);
+            init_pair(i + 1, i, COLOR_BLACK);
         }
     } else {
         throw std::runtime_error("Not enough color support!\n");
@@ -25,8 +25,8 @@ Board::Board() {
     nodelay(stdscr, TRUE);
 
     start_color();
-    //init_pair(1, COLOR_GREEN, COLOR_BLACK);
     initColorPairs();
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
 
     int maxX, maxY;
     getmaxyx(stdscr, maxY, maxX);
@@ -78,8 +78,8 @@ void printStackTrace() {
     
 void Board::setcell(Position point, Cell cell) {
     #ifdef RELEASE
-        *auxiliar[point.y][point.x] = cell.to_float();
-        *matrix[point.y][point.x] = cell;
+        (*auxiliar)[point.y][point.x] = cell.to_float();
+        (*matrix)[point.y][point.x] = cell;
 
     #else
         if (point.x >= width || point.y >= height) {
@@ -232,10 +232,10 @@ bool Board::compare (const Position point, const char c) const {
 // Sensorial extraction
 vectorf32 Board::get_sensorial_data (Position p) {
     vectorf32 slice;
-    slice.reserve(32);
+    slice.reserve(16);
 
-    for (int i = -2; i <= 2; i++) {
-        for (int j = -2; j <= 2; j++) {
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
             Position point = (p + Position{j, i}).mold(dimentions);
             slice.push_back( (*auxiliar)[point.y][point.x] );
         }
@@ -246,7 +246,7 @@ vectorf32 Board::get_sensorial_data (Position p) {
 
 Cell Board::get_cell(const Position p) const {
     #ifdef RELEASE
-        return *matrix[p.y][p.x] = cell;
+        return (*matrix)[p.y][p.x];
     #else
         if (p.x >= width || p.y >= height) {
             endwin();
