@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+#include <execution>
 
 #include "types.hpp"
 #include "Snake.hpp"
@@ -32,4 +34,5 @@ class Game {
         void handle_physics(float delta_time);
         void render_agents();
         void process_thought();
+        void run_simulation(float delta_time);
 };

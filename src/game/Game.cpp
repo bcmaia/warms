@@ -146,6 +146,30 @@ void Game::render_agents_setup() {
 
 }
 
+void Game::run_simulation(float delta_time) {
+    auto handle_physics_func = [&](Snake& snake) {
+        snake.move(board, time_factor * delta_time);
+    };
+
+    auto process_thought_func = [&](Snake& snake) {
+        snake.think(board);
+    };
+
+    auto render_shed_func = [&](Snake& snake) {
+        snake.shed_dead_cell(board);
+        
+    };
+
+    auto render_new_cells_func = [&](Snake& snake) {
+        snake.show_new_cell(board);
+    };
+
+    std::for_each(std::execution::par, agents.begin(), agents.end(), handle_physics_func);
+    std::for_each(std::execution::par, agents.begin(), agents.end(), process_thought_func);
+    std::for_each(std::execution::par, agents.begin(), agents.end(), render_shed_func);
+    std::for_each(std::execution::par, agents.begin(), agents.end(), render_new_cells_func);
+}
+
 
 void Game::run() {
     //========================================================================//
@@ -193,14 +217,17 @@ void Game::run() {
             board.rot_all();
         }
 
-        handle_physics( delta_time );
+        //handle_physics( delta_time );
 
         // Rendering
         
         /*if (10000 > count++) render_agents_setup();
         else */
-        process_thought();
-        render_agents();
+        //process_thought();
+        //render_agents();
+
+        run_simulation(delta_time);
+
         board.set_delta_time( timer.get_delta_time() );
         board.render();
         //board.displayValue( timer.get_delta_time() * SECONDS_TO_MILISECONDS );
