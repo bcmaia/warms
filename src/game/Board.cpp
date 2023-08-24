@@ -134,6 +134,16 @@ void Board::render_static () const {
     }
 }
 
+void Board::rot_all () {
+    for (size_t y = 0; y < matrix->size(); ++y) {
+        for (size_t x = 0; x < (*matrix)[y].size(); ++x) {
+            Cell& cell = (*matrix)[y][x];
+            if ('6' == cell.character || '&' == cell.character) cell = Cell{' ', 0};
+            mvaddch(1 + y, 1 + x, cell.character | COLOR_PAIR(cell.colorPair));
+        }
+    }
+}
+
 void Board::render () {
     drawOutline(width + 2, height + 2);
 

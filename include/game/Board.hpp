@@ -47,6 +47,7 @@ class Board {
         void set_cursor (const Position p, const char type, const bool put);
         Cell get_cell(const Position p) const;
         Position rand_empty_position (unsigned long seed);
+        void rot_all ();
 
     private:
         float delta_time;
@@ -67,3 +68,5 @@ class Board {
         void reset ();
         void display_delta_time () const;
 };
+
+

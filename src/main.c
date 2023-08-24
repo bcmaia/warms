@@ -3,7 +3,7 @@
 
 int main() {
     unsigned long seed = 1;
-    unsigned population_size = 10;
+    unsigned population_size = 20;
 
     Game game(seed, population_size);
     game.run();

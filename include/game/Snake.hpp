@@ -13,7 +13,7 @@
 
 //#define GENE_SIZE (10)
 
-#define SHRINK_FACTOR (1.0 / 100.0)
+#define SHRINK_FACTOR (1.0 / 100000.0)
 
 class Snake {
     public:
@@ -23,14 +23,12 @@ class Snake {
             unsigned short start_lenght
         );
          Snake(
-            const Snake& parent1,
-            const Snake& parent2,
+            Genome& parent1,
+            Genome& parent2,
             unsigned long seed, 
             Position initial, 
             unsigned short start_lenght
-        ) : Snake(seed, initial, start_lenght) {
-            genome = Genome(parent1.genome, parent2.genome, seed);
-        }
+        );
 
         ~Snake () {};
 
@@ -43,27 +41,27 @@ class Snake {
         void show_new_cell (Board& board);
         void survival_test(Board& board);
         void render (Board& board);
-        //Genome get_genome() {return genome;}
+        // Genome get_genome() {return genome;}
         Genome genome;
 
         float time_alive;
         bool alive;
-
+        unsigned short lenght;
     private:
         // float time_alive;
         bool moved;
         void die (Board& board);
-        unsigned short lenght;
-        //std::vector<float> genes;
+        
+        // std::vector<float> genes;
         Direction facing;
         std::mt19937 gen;
         
         float speed;
         float movement;
         float shrink;
-        
 
         Position neck;
         Option<Position> new_cell;
         Option<Position> dead_cell;
+        Option<Position> dead_cell_2;
 };  

@@ -15,6 +15,8 @@ class Genome {
         matrixf32 mind_factor;
         vectorf32 mind_addends;
 
+        ~Genome(){};
+
         Genome(unsigned long seed) {
             // Constructor to initialize the matrix and vector
             mind_factor = generateRandomMatrix(3, 25, seed);
@@ -43,17 +45,14 @@ class Genome {
             std::mt19937 gen(seed);
             std::uniform_int_distribution<size_t> dis(0, 1); // 0 or 1 randomly
 
-            mind_factor = parent1.mind_factor;
-            mind_addends = parent1.mind_addends;
+            mind_factor = matrixf32(3, vectorf32(25, 0.0));
+            mind_addends = vectorf32(3, 0.0);
 
             for (size_t i = 0; i < 3; ++i) {
                 for (size_t j = 0; j < 25; ++j) {
-                    if (dis(gen) == 1) {
-                        mind_factor[i][j] = parent2.mind_factor[i][j];
-                        mind_addends[j] = parent2.mind_addends[j];
-                    }
+                    mind_factor[i][j] = (1 == dis(gen)) ? parent1.mind_factor[i][j] : parent2.mind_factor[i][j];
                 }
-                mind_addends[i] = parent2.mind_addends[i]; // Always overwrite addends from parent2
+                mind_addends[i] = (1 == dis(gen)) ? parent1.mind_addends[i] : parent2.mind_addends[i]; 
             }
 
             mutate(0.01, seed);

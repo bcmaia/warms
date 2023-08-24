@@ -73,7 +73,7 @@ void Game::reproduce() {
             std::size_t index2 = index_dist(gen);
 
             Snake& parent1 = (
-                agents[index1].time_alive > agents[index2].time_alive 
+                agents[index1].time_alive + agents[index1].lenght > agents[index2].time_alive + agents[index2].lenght
                 ? agents[index1] 
                 : agents[index2]
             );
@@ -82,7 +82,7 @@ void Game::reproduce() {
             index2 = index_dist(gen);
 
             Snake& parent2 = (
-                agents[index1].time_alive > agents[index2].time_alive 
+                agents[index1].time_alive + agents[index1].lenght > agents[index2].time_alive + agents[index2].lenght
                 ? agents[index1] 
                 : agents[index2]
             );
@@ -100,7 +100,7 @@ void Game::reproduce() {
             unsigned long snakeSeed = seed_dist(gen);
             Position p = board.rand_empty_position(snakeSeed);
             agents.erase(agents.begin() + i);
-            agents.push_back(Snake(parent1, parent2, snakeSeed, p, 7));
+            agents.push_back( Snake(parent1.genome, parent2.genome, snakeSeed, p, 7) );
         }
     }
 }
@@ -164,6 +164,9 @@ void Game::run() {
     //========================================================================//
     int count = 0;
 
+    constexpr double cleaner_factor = 5000.0;
+    double cleaner_timer = 0;
+
     while (running) {
         // auto frameStart = Clock::now();
 
@@ -177,6 +180,13 @@ void Game::run() {
 
         // Simulation
         double delta_time = fast ? min_delta_time : timer.get_delta_time();
+
+        cleaner_timer += delta_time;
+        if (cleaner_factor < cleaner_timer) {
+            cleaner_timer = 0;
+            board.rot_all();
+        }
+
         handle_physics( delta_time );
 
         // Rendering

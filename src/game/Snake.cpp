@@ -5,7 +5,7 @@
 Snake::Snake(
     unsigned long seed, 
     Position initial = Position{0, 0}, 
-    unsigned short start_lenght = 3
+    unsigned short start_lenght = 10
 ) : genome(seed), gen(seed) {
     // Initialize genes with random values
     std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
@@ -36,11 +36,60 @@ Snake::Snake(
     // Example: initialize body, length, facing, etc.
 }
 
+
+
+
+
+
+
+Snake::Snake(
+    Genome& parent1,
+    Genome& parent2,
+    unsigned long seed, 
+    Position initial = Position{0, 0}, 
+    unsigned short start_lenght = 10
+) : genome(parent1, parent2, seed), gen(seed) {
+    // Initialize genes with random values
+    std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
+    //std::uniform_int_distribution<int> dis(-1000, 1000.0);
+
+    // for (size_t i = 0; i < GENE_SIZE; ++i) {
+    //     genes[i] = dis(gen);
+    // }
+
+    time_alive = 0;
+    moved = false;
+    alive = true;
+    float r = dis(gen);
+    facing = static_cast<Direction>(static_cast<unsigned>(r) % 4);
+
+    //body.reserve(8);
+    lenght = start_lenght;
+    r = dis(gen);
+    colorPair = 1 + static_cast<unsigned>(r) % 14;
+    body.emplace_back(initial);
+
+    speed = 0.01;
+    movement = 0;
+
+    shrink = 0;
+
+    // Initialize other member variables if needed
+    // Example: initialize body, length, facing, etc.
+}
+
+
+
+
+
+
+
+
 void Snake::die (Board& board) {
     alive = false;
 
     for (const Position &p : body) {
-        board.setcell(p, Cell{'&', colorPair});
+        board.setcell(p, Cell{'&', 1});
     }
 }
 
@@ -81,9 +130,10 @@ void Snake::move(Board& board, float deltaTime) {
     if (!alive) return;
 
     shrink += SHRINK_FACTOR * deltaTime;
-    if (1.0 > shrink) {
+    if (1.0 < shrink) {
         lenght--;
         shrink--;
+        if (3 > lenght) die(board);
     }
 
     // If we have momentum
@@ -116,6 +166,12 @@ void Snake::move(Board& board, float deltaTime) {
         body.pop_back();
     }
 
+    // Remove second
+    if (body.size() > lenght) {
+        dead_cell_2.set_value(body.back());
+        body.pop_back();
+    }
+
     time_alive += deltaTime;
 }
 
@@ -125,6 +181,11 @@ void Snake::shed_dead_cell (Board& board) {
         board.setcell(dead_cell.unwrap(), Cell(' ', 0));
         board.setcell(body.back(), Cell('+', colorPair));
         dead_cell.clear();
+    }
+
+    if (dead_cell_2.has_value()) {
+        board.setcell(dead_cell_2.unwrap(), Cell(' ', 0));
+        dead_cell_2.clear();
     }
 }
 
