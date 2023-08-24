@@ -100,7 +100,13 @@ void Game::reproduce() {
             unsigned long snakeSeed = seed_dist(gen);
             Position p = board.rand_empty_position(snakeSeed);
             agents.erase(agents.begin() + i);
-            agents.push_back( Snake(parent1.genome, parent2.genome, snakeSeed, p, 7) );
+            i--;
+            new_snakes.push_back( Snake(parent1.genome, parent2.genome, snakeSeed, p, 7) );
+        }
+
+        while (0 < new_snakes.size()) {
+            agents.push_back(new_snakes.back());
+            new_snakes.pop_back();
         }
     }
 }
@@ -164,7 +170,7 @@ void Game::run() {
     //========================================================================//
     int count = 0;
 
-    constexpr double cleaner_factor = 5000.0;
+    constexpr double cleaner_factor = 10000.0;
     double cleaner_timer = 0;
 
     while (running) {

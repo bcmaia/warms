@@ -101,7 +101,8 @@ void Snake::think(Board& board) {
     // printf("< sensorial input size [%ld] >", sensorial_input.size());
     // exit(1);
 
-    // sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
+    sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
+    sensorial_input.push_back( ((float)genome.colorPair) * (1.0 / 16.0) );
 
     vectorf32 decision_vec = genome.think(sensorial_input);
     
@@ -133,7 +134,7 @@ void Snake::move(Board& board, float deltaTime) {
     if (1.0 < shrink) {
         lenght--;
         shrink--;
-        if (3 > lenght) die(board);
+        if (3 > lenght) {die(board); return;}
     }
 
     // If we have momentum
@@ -179,7 +180,7 @@ void Snake::move(Board& board, float deltaTime) {
 void Snake::shed_dead_cell (Board& board) {
     if (dead_cell.has_value()) {
         board.setcell(dead_cell.unwrap(), Cell(' ', 0));
-        board.setcell(body.back(), Cell('+', colorPair));
+        board.setcell(body.back(), Cell('+', genome.colorPair));
         dead_cell.clear();
     }
 
@@ -191,20 +192,20 @@ void Snake::shed_dead_cell (Board& board) {
 
 void Snake::show_new_cell (Board& board) {
     if (new_cell.has_value()) {
-        board.setcell(neck, Cell{'*', colorPair});
-        board.setcell(new_cell.unwrap(), Cell{'@', colorPair});
+        board.setcell(neck, Cell{'*', genome.colorPair});
+        board.setcell(new_cell.unwrap(), Cell{'@', genome.colorPair});
         new_cell.clear();
     }
 }
 
 void Snake::render (Board& board) {
     for (const Position &p : body) {
-        board.setcell(p, Cell{'*', colorPair});
+        board.setcell(p, Cell{'*', genome.colorPair});
     }
 
     if (0 < body.size()) {
-        board.setcell(body.back(), Cell{'+', colorPair});
-        board.setcell(body.front(), Cell{'@', colorPair});
+        board.setcell(body.back(), Cell{'+', genome.colorPair});
+        board.setcell(body.front(), Cell{'@', genome.colorPair});
     }
 }
 

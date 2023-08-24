@@ -10,32 +10,51 @@
 #include <random>
 #include <stdexcept>
 
+
+
+#define MIND_SIZE (27)
+
+
 class Genome {
     public:
         matrixf32 mind_factor;
         vectorf32 mind_addends;
+        ColorPair colorPair;
 
         ~Genome(){};
 
         Genome(unsigned long seed) {
             // Constructor to initialize the matrix and vector
-            mind_factor = generateRandomMatrix(3, 25, seed);
+            mind_factor = generateRandomMatrix(3, MIND_SIZE, seed);
             mind_addends = generateRandomVector(3, seed);
+
+            colorPair = 10;
         }
 
         void mutate(float mutationProbability, unsigned long seed) {
             std::mt19937 gen(seed);
             std::uniform_real_distribution<float> dis(-1.0, 1.0);
             std::bernoulli_distribution mutateDist(mutationProbability);
+            std::bernoulli_distribution mutationTypeDist(0.5);
 
             for (size_t i = 0; i < 3; ++i) {
-                for (size_t j = 0; j < 25; ++j) {
+                for (size_t j = 0; j < MIND_SIZE; ++j) {
                     if (mutateDist(gen)) {
-                        mind_factor[i][j] = dis(gen);
+                        if (mutationTypeDist(gen))
+                            mind_factor[i][j] = dis(gen);
+                        else
+                            mind_factor[i][j] *= dis(gen);
                     }
                 }
                 if (mutateDist(gen)) {
-                    mind_addends[i] = dis(gen);
+                    if (mutationTypeDist(gen))
+                        mind_addends[i] = dis(gen);
+                    else
+                        mind_addends[i] *= dis(gen);
+                }
+
+                if (mutateDist(gen)) {
+                    colorPair = static_cast<unsigned>(16 + 16 * dis(gen)) % 16;
                 }
             }
         }
@@ -45,17 +64,19 @@ class Genome {
             std::mt19937 gen(seed);
             std::uniform_int_distribution<size_t> dis(0, 1); // 0 or 1 randomly
 
-            mind_factor = matrixf32(3, vectorf32(25, 0.0));
+            mind_factor = matrixf32(3, vectorf32(MIND_SIZE, 0.0));
             mind_addends = vectorf32(3, 0.0);
 
             for (size_t i = 0; i < 3; ++i) {
-                for (size_t j = 0; j < 25; ++j) {
+                for (size_t j = 0; j < MIND_SIZE; ++j) {
                     mind_factor[i][j] = (1 == dis(gen)) ? parent1.mind_factor[i][j] : parent2.mind_factor[i][j];
                 }
                 mind_addends[i] = (1 == dis(gen)) ? parent1.mind_addends[i] : parent2.mind_addends[i]; 
             }
 
-            mutate(0.01, seed);
+            colorPair = (1 == dis(gen)) ? parent1.colorPair : parent2.colorPair;
+
+            mutate(0.05, seed);
         }
 
         vectorf32 think (const vectorf32& sensorial_input) {
@@ -64,8 +85,8 @@ class Genome {
             #ifndef RELEASE
                 if (
                     mind_factor.size() != 3 
-                    || mind_factor[0].size() != 25
-                    || sensorial_input.size() != 25 
+                    || mind_factor[0].size() != MIND_SIZE
+                    || sensorial_input.size() != MIND_SIZE 
                     || mind_addends.size() != 3
                 ) {
                     throw std::runtime_error(
@@ -81,7 +102,7 @@ class Genome {
             #endif
 
             for (size_t i = 0; i < 3; ++i) {
-                for (size_t j = 0; j < 25; ++j) {
+                for (size_t j = 0; j < MIND_SIZE; ++j) {
                     result[i] += mind_factor[i][j] * mind_addends[j] + mind_addends[i];
                 }
             }

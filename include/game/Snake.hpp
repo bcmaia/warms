@@ -13,7 +13,7 @@
 
 //#define GENE_SIZE (10)
 
-#define SHRINK_FACTOR (1.0 / 100000.0)
+#define SHRINK_FACTOR (1.0 / 1000.0)
 
 class Snake {
     public:

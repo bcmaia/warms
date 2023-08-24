@@ -145,7 +145,7 @@ void Board::rot_all () {
 }
 
 void Board::render () {
-    drawOutline(width + 2, height + 2);
+    if (scr_active) drawOutline(width + 2, height + 2);
 
     //if (scr_active) {render_static ();}
 
