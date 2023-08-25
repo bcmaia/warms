@@ -130,6 +130,8 @@ void Snake::think(Board& board) {
             break;
     }
     //facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
+
+    if (oldFacing != facing) fitness += 1.0;
 }
 
 void Snake::move(Board& board, float deltaTime) {
@@ -162,11 +164,10 @@ void Snake::move(Board& board, float deltaTime) {
     // Check for berries
     if (board.compare(new_point, '&') || board.compare(new_point, '6')) {
         lenght++;
-        fitness += 100.0;
+        fitness += 1.0;
     }
 
-    fitness += deltaTime * 0.001;
-    if (oldFacing != facing) fitness += 10000.0;
+    //fitness += deltaTime * 0.000001;
     
 
     // Add new cell

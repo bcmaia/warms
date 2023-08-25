@@ -11,7 +11,8 @@
 
 #define OUTPUT_SIZE (4)
 #define MIND_SIZE (25 + 4)
-#define MUTATION_RATE (0.03)
+#define MUTATION_RATE (0.01)
+#define MUTATION_RATE_2 (0.1)
 
 
 class Genome {
@@ -63,6 +64,7 @@ class Genome {
             // Constructor for crossover between two Genome
             std::mt19937 gen(seed);
             std::uniform_int_distribution<size_t> dis(0, 1); // 0 or 1 randomly
+            std::uniform_int_distribution<int> dis_2(0, 5); // 0 or 1 randomly
 
             mind_factor = matrixf32(OUTPUT_SIZE, vectorf32(MIND_SIZE, 0.0));
             mind_addends = vectorf32(OUTPUT_SIZE, 0.0);
@@ -76,7 +78,7 @@ class Genome {
 
             colorPair = (1 == dis(gen)) ? parent1.colorPair : parent2.colorPair;
 
-            mutate(MUTATION_RATE, seed);
+            mutate(dis_2(gen) ? MUTATION_RATE : MUTATION_RATE_2, seed);
         }
 
         vectorf32 think (const vectorf32& sensorial_input) {

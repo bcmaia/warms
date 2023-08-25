@@ -21,7 +21,7 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
         agents.push_back(Snake(snakeSeed, p, 5));
     }
 
-    bests = std::vector<SavedGenome>(1000, SavedGenome{0.0, Genome(seed)});
+    bests = std::vector<SavedGenome>(100, SavedGenome{0.0, Genome(seed)});
 
     running = true;
 }
@@ -77,7 +77,7 @@ void Game::reproduce() {
             std::size_t index2 = index_dist(gen);
 
             Genome parent1 = (
-                seed_dist(gen) % 25
+                seed_dist(gen) % 3
                 ? ( 
                     agents[index1].fitness > agents[index2].fitness
                     ? agents[index1].genome 
@@ -92,7 +92,7 @@ void Game::reproduce() {
             index2 = index_dist(gen);
 
             Genome parent2 = (
-                seed_dist(gen) % 25
+                seed_dist(gen) % 3
                 ? ( 
                     agents[index1].fitness > agents[index2].fitness
                     ? agents[index1].genome 
@@ -275,7 +275,7 @@ void Game::run() {
 void Game::updateBestItem(const SavedGenome& newItem) {
     // Iterate through the bests vector to find an item with lesser fitness
     for (auto& item : bests) {
-        if (newItem.fitness < item.fitness) {
+        if (newItem.fitness > item.fitness) {
             item = newItem; // Substitute the item with lesser fitness
             return;
         }
@@ -284,19 +284,19 @@ void Game::updateBestItem(const SavedGenome& newItem) {
 
 
 Genome Game::getRandomGenome() {
-        // Create a random number generator
-        // std::random_device rd;
-        // std::mt19937 gen(rd());
-        
-        // If the bests vector is empty, return a default-constructed Genome
-        if (bests.empty()) {
-            return Genome(0); // Assuming Genome has a default constructor
-        }
-
-        // Generate a random index within the bounds of the bests vector
-        std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
-        size_t randomIndex = dist(gen);
-
-        // Return the genome at the randomly chosen index
-        return bests[randomIndex].genome;
+    // Create a random number generator
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    
+    // If the bests vector is empty, return a default-constructed Genome
+    if (bests.empty()) {
+        return Genome(0); // Assuming Genome has a default constructor
     }
+
+    // Generate a random index within the bounds of the bests vector
+    std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
+    size_t randomIndex = dist(gen);
+
+    // Return the genome at the randomly chosen index
+    return bests[randomIndex].genome;
+}
