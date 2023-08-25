@@ -240,8 +240,8 @@ vectorf32 Board::get_sensorial_data (Position p) {
     vectorf32 slice;
     slice.reserve(16);
 
-    for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
             Position point = (p + Position{j, i}).mold(dimentions);
             slice.push_back( (*auxiliar)[point.y][point.x] );
         }

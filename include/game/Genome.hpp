@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "utils.hpp"
 #include "types.hpp"
 
@@ -12,8 +10,8 @@
 
 
 #define OUTPUT_SIZE (4)
-#define MIND_SIZE (10)
-#define MUTATION_RATE (0.05)
+#define MIND_SIZE (25 + 4)
+#define MUTATION_RATE (0.03)
 
 
 class Genome {
@@ -111,4 +109,28 @@ class Genome {
 
             return result;
         }
+
+
+    Genome(const Genome& other) {
+        // Copy constructor for deep copy
+        mind_factor = other.mind_factor;
+        mind_addends = other.mind_addends;
+        colorPair = other.colorPair;
+    }
+
+    Genome& operator=(const Genome& other) {
+        // Copy assignment operator for deep copy
+        if (this != &other) {
+            mind_factor = other.mind_factor;
+            mind_addends = other.mind_addends;
+            colorPair = other.colorPair;
+        }
+        return *this;
+    }
+};
+
+
+struct SavedGenome {
+    float fitness;
+    Genome genome;
 };

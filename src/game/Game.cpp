@@ -21,6 +21,8 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
         agents.push_back(Snake(snakeSeed, p, 5));
     }
 
+    bests = std::vector<SavedGenome>(1000, SavedGenome{0.0, Genome(seed)});
+
     running = true;
 }
 
@@ -68,23 +70,35 @@ void Game::reproduce() {
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
         if (!snake.alive) {
+            
+
             //continue;
             std::size_t index1 = index_dist(gen);
             std::size_t index2 = index_dist(gen);
 
-            Snake& parent1 = (
-                agents[index1].fitness > agents[index2].fitness
-                ? agents[index1] 
-                : agents[index2]
+            Genome parent1 = (
+                seed_dist(gen) % 25
+                ? ( 
+                    agents[index1].fitness > agents[index2].fitness
+                    ? agents[index1].genome 
+                    : agents[index2].genome
+                )
+                : getRandomGenome()
             );
+
+
 
             index1 = index_dist(gen);
             index2 = index_dist(gen);
 
-            Snake& parent2 = (
-                agents[index1].fitness > agents[index2].fitness
-                ? agents[index1] 
-                : agents[index2]
+            Genome parent2 = (
+                seed_dist(gen) % 25
+                ? ( 
+                    agents[index1].fitness > agents[index2].fitness
+                    ? agents[index1].genome 
+                    : agents[index2].genome
+                )
+                : getRandomGenome()
             );
 
             // index1 = index_dist(gen);
@@ -99,16 +113,24 @@ void Game::reproduce() {
 
             unsigned long snakeSeed = seed_dist(gen);
             Position p = board.rand_empty_position(snakeSeed);
-            agents.erase(agents.begin() + i);
-            i--;
-            new_snakes.push_back( Snake(parent1.genome, parent2.genome, snakeSeed, p, 7) );
-        }
-
-        while (0 < new_snakes.size()) {
-            agents.push_back(new_snakes.back());
-            new_snakes.pop_back();
+            //agents.erase(agents.begin() + i);
+            //i--;
+            new_snakes.push_back( Snake(parent1, parent2, snakeSeed, p, 5) );
         }
     }
+
+    size_t index = 0;
+    for (size_t i = 0; i < agents.size(); i++) {
+        Snake& snake = agents[i];
+        if (!snake.alive) {
+            agents[i] = new_snakes[index++];
+        }
+    }
+
+    // while (0 < new_snakes.size()) {
+    //     agents.push_back(new_snakes.back());
+    //     new_snakes.pop_back();
+    // }
 }
 
 
@@ -195,7 +217,7 @@ void Game::run() {
     //========================================================================//
     //int count = 0;
 
-    constexpr double cleaner_factor = 3000.0;
+    constexpr double cleaner_factor = 1000.0;
     double cleaner_timer = 0;
 
     while (running) {
@@ -250,3 +272,31 @@ void Game::run() {
 }
 
 
+void Game::updateBestItem(const SavedGenome& newItem) {
+    // Iterate through the bests vector to find an item with lesser fitness
+    for (auto& item : bests) {
+        if (newItem.fitness < item.fitness) {
+            item = newItem; // Substitute the item with lesser fitness
+            return;
+        }
+    }
+}
+
+
+Genome Game::getRandomGenome() {
+        // Create a random number generator
+        // std::random_device rd;
+        // std::mt19937 gen(rd());
+        
+        // If the bests vector is empty, return a default-constructed Genome
+        if (bests.empty()) {
+            return Genome(0); // Assuming Genome has a default constructor
+        }
+
+        // Generate a random index within the bounds of the bests vector
+        std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
+        size_t randomIndex = dist(gen);
+
+        // Return the genome at the randomly chosen index
+        return bests[randomIndex].genome;
+    }

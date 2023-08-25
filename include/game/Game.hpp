@@ -17,6 +17,7 @@ class Game {
         void run();
         
     private:
+        std::vector<SavedGenome> bests;
         std::mt19937 gen;
 
         Board board;
@@ -38,4 +39,6 @@ class Game {
         void render_agents();
         void process_thought();
         void run_simulation(float delta_time);
+        void updateBestItem(const SavedGenome& newItem);
+        Genome getRandomGenome();
 };

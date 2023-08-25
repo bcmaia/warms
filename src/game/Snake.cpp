@@ -106,6 +106,7 @@ void Snake::think(Board& board) {
     sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
     sensorial_input.push_back( dis(gen) );
     sensorial_input.push_back( state );
+    sensorial_input.push_back( time_alive );
 
     vectorf32 decision_vec = genome.think(sensorial_input);
     state = decision_vec[3];
@@ -136,11 +137,12 @@ void Snake::move(Board& board, float deltaTime) {
     if (!alive) return;
 
     shrink += SHRINK_FACTOR * deltaTime;
+
     if (1.0 < shrink) {
         lenght--;
         shrink--;
         if (3 > lenght) {die(board); return;}
-    }
+    } 
 
     // If we have momentum
     movement += speed * deltaTime;
@@ -160,11 +162,12 @@ void Snake::move(Board& board, float deltaTime) {
     // Check for berries
     if (board.compare(new_point, '&') || board.compare(new_point, '6')) {
         lenght++;
-        fitness += 1.0;
+        fitness += 100.0;
     }
 
-    fitness += deltaTime * 0.000001;
-    if (oldFacing != facing) {fitness += deltaTime * 1.0;}
+    fitness += deltaTime * 0.001;
+    if (oldFacing != facing) fitness += 10000.0;
+    
 
     // Add new cell
     body.push_front(new_point);
