@@ -11,9 +11,10 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-//#define GENE_SIZE (10)
 
+// Determines how many 
 #define SHRINK_FACTOR (1.0 / 10000.0)
+
 
 class Snake {
     public:
@@ -41,13 +42,13 @@ class Snake {
         void show_new_cell (Board& board);
         void survival_test(Board& board);
         void render (Board& board);
-        // Genome get_genome() {return genome;}
         Genome genome;
 
         float fitness;
         float time_alive;
         bool alive;
         unsigned short lenght;
+
     private:
         float state;
         

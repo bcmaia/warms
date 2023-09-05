@@ -132,7 +132,12 @@ class Genome {
 };
 
 
-struct SavedGenome {
-    float fitness;
-    Genome genome;
+class SavedGenome {
+    public:
+        float fitness;
+        Genome genome;
+
+        bool operator< (const SavedGenome& other) const {
+            return fitness < other.fitness;
+        }
 };

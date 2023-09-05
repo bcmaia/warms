@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <execution>
 
+#include "constants.hpp"
 #include "types.hpp"
 #include "Snake.hpp"
 #include "Timer.hpp"

@@ -21,7 +21,7 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
         agents.push_back(Snake(snakeSeed, p, 5));
     }
 
-    bests = std::vector<SavedGenome>(100, SavedGenome{0.0, Genome(seed)});
+    bests = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
 
     running = true;
 }
@@ -273,11 +273,14 @@ void Game::run() {
 
 
 void Game::updateBestItem(const SavedGenome& newItem) {
-    // Iterate through the bests vector to find an item with lesser fitness
-    for (auto& item : bests) {
-        if (newItem.fitness > item.fitness) {
-            item = newItem; // Substitute the item with lesser fitness
-            return;
+    if (bests.size() < GOATS_VEC_SIZE) {
+        bests.push_back(newItem);
+    } else {
+        auto index = std::lower_bound(bests.begin(), bests.end(), newItem);
+        if (index != bests.end()) {
+            *index = newItem; // Use the iterator to replace the element
+        } else {
+            bests.push_back(newItem); // If newItem is larger than all existing items, add it to the end
         }
     }
 }
@@ -300,3 +303,28 @@ Genome Game::getRandomGenome() {
     // Return the genome at the randomly chosen index
     return bests[randomIndex].genome;
 }
+
+// SavedGenome getRandomSavedGenome() {
+//     // Generate a random number between 0 and 2 to choose one of the vectors
+//     std::uniform_int_distribution<int> distribution(0, 2);
+//     int vectorChoice = distribution(gen);
+
+//     // Select the vector based on the random choice
+//     const std::vector<SavedGenome>& selectedVector = 
+//         (vectorChoice == 0) ? vector1 :
+//         (vectorChoice == 1) ? vector2 :
+//         vector3;
+
+//     // Check if the selected vector is empty
+//     if (selectedVector.empty()) {
+//         // Return a default SavedGenome or handle the case as needed
+//         return SavedGenome(0.0); // Default constructor with fitness 0.0
+//     }
+
+//     // Generate a random index within the selected vector
+//     std::uniform_int_distribution<int> indexDistribution(0, selectedVector.size() - 1);
+//     int randomIndex = indexDistribution(gen);
+
+//     // Return the random SavedGenome from the selected vector
+//     return selectedVector[randomIndex];
+// }

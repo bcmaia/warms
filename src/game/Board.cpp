@@ -4,7 +4,7 @@ void initColorPairs() {
     if (has_colors() && COLOR_PAIRS >= 16) {
         // Initialize color pairs with black background
         for (int i = 0; i < 16; ++i) {
-            init_pair(i + 1, i, COLOR_BLACK);
+            init_pair(i + 1, COLOR_BLACK, i);
         }
     } else {
         throw std::runtime_error("Not enough color support!\n");
