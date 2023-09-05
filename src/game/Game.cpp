@@ -21,7 +21,10 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
         agents.push_back(Snake(snakeSeed, p, 5));
     }
 
+    // It is best to garante that those vecs always have something than to check
+    // every frame if they are emptys
     bests = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
+    stock = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
 
     running = true;
 }
@@ -304,10 +307,6 @@ Genome Game::getRandomGenome() {
     std::uniform_int_distribution<int> dist_1(0, 1);
 
     if (dist_1(gen)) {
-        if (stock.empty()) {
-            return Genome();
-        }
-
         // Generate a random index within the bounds of the bests vector
         std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
         size_t randomIndex = dist(gen);
@@ -315,10 +314,6 @@ Genome Game::getRandomGenome() {
         // Return the genome at the randomly chosen index
         return stock[randomIndex].genome;
     } else {
-        if (bests.empty()) {
-            return Genome();
-        }
-
         // Generate a random index within the bounds of the bests vector
         std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
         size_t randomIndex = dist(gen);
