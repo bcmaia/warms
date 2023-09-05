@@ -11,12 +11,12 @@
 
 
 #define OUTPUT_SIZE (4)
-#define MIND_SIZE (25 + 4)
+#define MIND_SIZE (11 * 11 * 5 + 4)
 #define MUTATION_RATE (0.01)
 #define MUTATION_RATE_2 (0.1)
 
-#define INPUT_SIZE (25 + 4)
-#define HIDDEN_SIZE (32)
+#define INPUT_SIZE (11 * 11 * 5 + 4)
+#define HIDDEN_SIZE (64)
 
 
 class Genome {

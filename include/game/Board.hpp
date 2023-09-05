@@ -12,6 +12,7 @@
 #include <sstream>
 #include <random>
 
+#include "constants.hpp"
 #include "types.hpp"
 
 class Board {

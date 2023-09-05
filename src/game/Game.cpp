@@ -220,7 +220,7 @@ void Game::run() {
     //========================================================================//
     //int count = 0;
 
-    constexpr double cleaner_factor = 1000.0;
+    //constexpr double cleaner_factor = 1000.0;
     double cleaner_timer = 0;
 
     while (running) {
@@ -238,7 +238,7 @@ void Game::run() {
         double delta_time = fast ? min_delta_time : timer.get_delta_time();
 
         cleaner_timer += delta_time;
-        if (cleaner_factor < cleaner_timer) {
+        if (CLEANER_TIMER < cleaner_timer) {
             cleaner_timer = 0;
             board.rot_all();
         }

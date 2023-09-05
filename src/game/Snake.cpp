@@ -131,15 +131,15 @@ void Snake::think(Board& board) {
     }
     //facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
 
-    if (oldFacing != facing) fitness += 1.0;
+    //if (oldFacing != facing) fitness += 1.0;
 }
 
 void Snake::move(Board& board, float deltaTime) {
     // If we are alive
     if (!alive) return;
 
+    // If we must shrink
     shrink += SHRINK_FACTOR * deltaTime;
-
     if (1.0 < shrink) {
         lenght--;
         shrink--;

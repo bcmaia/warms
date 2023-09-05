@@ -47,11 +47,13 @@ Board::Board() {
 
     atexit(Board::cleanupNcurses);
 
-    for (int i = 0; i < width; i++ ) {setcell(Position{i, 0}, Cell{'#', 1});}
-    for (int i = 0; i < height; i++ ) {setcell(Position{0, i}, Cell{'#', 1});}
+    if (MAKE_SIMULATION_GREAT_AGAIN) {
+        for (int i = 0; i < width; i++ ) {setcell(Position{i, 0}, Cell{'#', 1});}
+        for (int i = 0; i < height; i++ ) {setcell(Position{0, i}, Cell{'#', 1});}
 
-    for (int i = 0; i < width; i++ ) {setcell(Position{i, height - 1}, Cell{'#', 1});}
-    for (int i = 0; i < height; i++ ) {setcell(Position{width - 1, i}, Cell{'#', 1});}
+        for (int i = 0; i < width; i++ ) {setcell(Position{i, height - 1}, Cell{'#', 1});}
+        for (int i = 0; i < height; i++ ) {setcell(Position{width - 1, i}, Cell{'#', 1});}
+    }
 }
 
 Board::~Board() {
@@ -234,16 +236,46 @@ bool Board::compare (const Position point, const char c) const {
     return c == (*matrix)[point.y][point.x].character;
 }
 
+bool isFood (const char c) {
+    return '&' == c || '6' == c;
+}
+
+bool isSolid (const char c) {
+    return (
+        ('*' == c)
+        || ('@' == c)
+        || ('+' == c)
+        || ('#' == c)
+    );
+}
+
+bool isSnake (const char c) {
+    return '@' == c || '*' == c || '+' == c;
+}
+
+bool isSnakeHead (const char c) {
+    return '@' == c;
+}
+
 
 // Sensorial extraction
 vectorf32 Board::get_sensorial_data (Position p) {
     vectorf32 slice;
-    slice.reserve(16);
+    slice.reserve(11 * 11 * 6);
 
-    for (int i = -2; i <= 2; i++) {
-        for (int j = -2; j <= 2; j++) {
+    for (int i = -5; i <= 5; i++) {
+        for (int j = -5; j <= 5; j++) {
+
             Position point = (p + Position{j, i}).mold(dimentions);
-            slice.push_back( (*auxiliar)[point.y][point.x] );
+            char c = (*matrix)[point.y][point.x].character;
+
+            slice.push_back( static_cast<float>(c) * (1.0 / 256.0));
+            slice.push_back( static_cast<float>((*matrix)[point.y][point.x].colorPair) * (1.0 / 16.0));
+
+            slice.push_back( isSolid(c) ? 1.0 : 0.0 );
+            slice.push_back( isSnake(c) ? 1.0 : 0.0 );
+            slice.push_back( isSnakeHead(c) ? 1.0 : 0.0 );
+            slice.push_back( isFood(c) ? 1.0 : 0.0 );
         }
     }
 
