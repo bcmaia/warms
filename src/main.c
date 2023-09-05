@@ -1,19 +1,15 @@
-#include "Game.hpp"
 #include <random>
+#include "constants.hpp"
+#include "Game.hpp"
+
 
 int main() {
-    // printf("%f\n", Cell('*', 7).to_float());
-
-    // return 0;
-    // //unsigned long seed = 1;
-    unsigned population_size = 100;
-
     std::random_device rd;  // Obtain a random seed from hardware
     std::mt19937_64 eng(rd());  // Seed the random number generator
     std::uniform_int_distribution<unsigned long> dist;
-    unsigned long random_value = dist(eng); 
+    unsigned long seed = dist(eng); 
 
-    Game game(random_value, population_size);
+    Game game(seed, POPULATION_SIZE);
     game.run();
 
     return 0;
