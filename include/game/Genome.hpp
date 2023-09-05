@@ -21,7 +21,9 @@ class Genome {
         vectorf32 mind_addends;
         ColorPair colorPair;
 
-        ~Genome(){};
+        ~Genome() {};
+
+        Genome() : Genome (std::rand()) {};
 
         Genome(unsigned long seed) {
             // Constructor to initialize the matrix and vector

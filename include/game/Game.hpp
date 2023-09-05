@@ -19,6 +19,7 @@ class Game {
         
     private:
         std::vector<SavedGenome> bests;
+        std::vector<SavedGenome> stock;
         std::mt19937 gen;
 
         Board board;

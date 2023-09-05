@@ -273,6 +273,14 @@ void Game::run() {
 
 
 void Game::updateBestItem(const SavedGenome& newItem) {
+    if (stock.size() < STOCK_VEC_SIZE) {
+        stock.push_back(newItem);
+    } else {
+        std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
+        size_t randomIndex = dist(gen);
+        stock[randomIndex] = newItem;
+    }
+
     if (bests.size() < GOATS_VEC_SIZE) {
         bests.push_back(newItem);
     } else {
@@ -292,16 +300,34 @@ Genome Game::getRandomGenome() {
     // std::mt19937 gen(rd());
     
     // If the bests vector is empty, return a default-constructed Genome
-    if (bests.empty()) {
-        return Genome(0); // Assuming Genome has a default constructor
+    
+    std::uniform_int_distribution<int> dist_1(0, 1);
+
+    if (dist_1(gen)) {
+        if (stock.empty()) {
+            return Genome();
+        }
+
+        // Generate a random index within the bounds of the bests vector
+        std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
+        size_t randomIndex = dist(gen);
+
+        // Return the genome at the randomly chosen index
+        return stock[randomIndex].genome;
+    } else {
+        if (bests.empty()) {
+            return Genome();
+        }
+
+        // Generate a random index within the bounds of the bests vector
+        std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
+        size_t randomIndex = dist(gen);
+
+        // Return the genome at the randomly chosen index
+        return bests[randomIndex].genome;
     }
 
-    // Generate a random index within the bounds of the bests vector
-    std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
-    size_t randomIndex = dist(gen);
-
-    // Return the genome at the randomly chosen index
-    return bests[randomIndex].genome;
+    
 }
 
 // SavedGenome getRandomSavedGenome() {
