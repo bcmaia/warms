@@ -26,6 +26,10 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
     bests = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
     stock = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
 
+    // Reserve max space (with a little extra)
+    bests.reserve(GOATS_VEC_SIZE + 2);
+    stock.reserve(STOCK_VEC_SIZE + 2); 
+
     running = true;
 }
 
@@ -66,59 +70,21 @@ void Game::reproduce() {
     //return;
     std::uniform_int_distribution<std::size_t> index_dist (0, agents.size() - 1);
     std::uniform_int_distribution<unsigned long> seed_dist (0, std::numeric_limits<unsigned long>::max());
-    //return;
+    std::bernoulli_distribution which_pool_dist (1.0 / 3.0);
+
     std::vector<Snake> new_snakes;
 
     // the 2 fors keep things fair
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
         if (!snake.alive) {
-            
-
-            //continue;
-            std::size_t index1 = index_dist(gen);
-            std::size_t index2 = index_dist(gen);
-
-            Genome parent1 = (
-                seed_dist(gen) % 3
-                ? ( 
-                    agents[index1].fitness > agents[index2].fitness
-                    ? agents[index1].genome 
-                    : agents[index2].genome
-                )
-                : getRandomGenome()
-            );
-
-
-
-            index1 = index_dist(gen);
-            index2 = index_dist(gen);
-
-            Genome parent2 = (
-                seed_dist(gen) % 3
-                ? ( 
-                    agents[index1].fitness > agents[index2].fitness
-                    ? agents[index1].genome 
-                    : agents[index2].genome
-                )
-                : getRandomGenome()
-            );
-
-            // index1 = index_dist(gen);
-            // index2 = index_dist(gen);
-            // Snake& competitor1 = agents[index1];
-            // Snake& competitor2 = agents[index2];
-            // Snake& parent1 =  agents[index1].time_alive > agents[index2].time_alive ? agents[index1] : agents[index2];
-
-            // index1 = index_dist(gen) % agents.size();
-            // index2 = index_dist(gen) % agents.size();
-            // Snake& parent2 = agents[index1].time_alive > agents[index2].time_alive ? agents[index1] : agents[index2];
+            Genome parent_1 = get_random_parent();
+            Genome parent_2 = get_random_parent();
 
             unsigned long snakeSeed = seed_dist(gen);
             Position p = board.rand_empty_position(snakeSeed);
-            //agents.erase(agents.begin() + i);
-            //i--;
-            new_snakes.push_back( Snake(parent1, parent2, snakeSeed, p, 5) );
+           
+            new_snakes.push_back( Snake(parent_1, parent_2, snakeSeed, p, 5) );
         }
     }
 
@@ -286,43 +252,67 @@ void Game::updateBestItem(const SavedGenome& newItem) {
 
     if (bests.size() < GOATS_VEC_SIZE) {
         bests.push_back(newItem);
-    } else {
-        auto index = std::lower_bound(bests.begin(), bests.end(), newItem);
-        if (index != bests.end()) {
-            *index = newItem; // Use the iterator to replace the element
-        } else {
-            bests.push_back(newItem); // If newItem is larger than all existing items, add it to the end
-        }
+        std::push_heap(bests.begin(), bests.end());
+    } else if (newItem < bests.front()) {
+        std::pop_heap(bests.begin(), bests.end());
+        bests.pop_back();
+        bests.push_back(newItem);
+        std::push_heap(bests.begin(), bests.end());
     }
 }
 
 
-Genome Game::getRandomGenome() {
+SavedGenome Game::getRandomGenome() {
     // Create a random number generator
     // std::random_device rd;
     // std::mt19937 gen(rd());
     
     // If the bests vector is empty, return a default-constructed Genome
     
-    std::uniform_int_distribution<int> dist_1(0, 1);
+    std::uniform_int_distribution<short> which_pool_dist (0, 6);
 
-    if (dist_1(gen)) {
-        // Generate a random index within the bounds of the bests vector
-        std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
-        size_t randomIndex = dist(gen);
+    switch (which_pool_dist(gen)) {
+        case 0: {
+            // Generate a random index within the bounds of the bests vector
+            std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
+            size_t randomIndex = dist(gen);
 
-        // Return the genome at the randomly chosen index
-        return stock[randomIndex].genome;
-    } else {
-        // Generate a random index within the bounds of the bests vector
-        std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
-        size_t randomIndex = dist(gen);
+            // Return the genome at the randomly chosen index
+            return stock[randomIndex];
+        } break;
 
-        // Return the genome at the randomly chosen index
-        return bests[randomIndex].genome;
+        case 1: {
+            // Generate a random index within the bounds of the bests vector
+            std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
+            size_t randomIndex = dist(gen);
+
+            // Return the genome at the randomly chosen index
+            return bests[randomIndex];
+        } break;
+
+        case 2: {
+            // Generate a random index within the bounds of the bests vector
+            std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
+            size_t randomIndex = dist(gen);
+
+            // Return the genome at the randomly chosen index
+            return bests[randomIndex];
+        } break;
+
+        default: { 
+            // Generate a random index within the bounds of the bests vector
+            std::uniform_int_distribution<size_t> dist(0, agents.size() - 1);
+            size_t randomIndex = dist(gen);
+
+            return SavedGenome {agents[randomIndex].fitness, agents[randomIndex].genome};
+        } break;
     }
+}
 
-    
+Genome Game::get_random_parent () {
+    SavedGenome option_1 = getRandomGenome();
+    SavedGenome option_2 = getRandomGenome();
+    return option_1.fitness > option_2.fitness ? option_1.genome : option_2.genome;
 }
 
 // SavedGenome getRandomSavedGenome() {

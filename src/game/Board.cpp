@@ -48,11 +48,39 @@ Board::Board() {
     atexit(Board::cleanupNcurses);
 
     if (MAKE_SIMULATION_GREAT_AGAIN) {
-        for (int i = 0; i < width; i++ ) {setcell(Position{i, 0}, Cell{'#', 1});}
-        for (int i = 0; i < height; i++ ) {setcell(Position{0, i}, Cell{'#', 1});}
+        for (int i = 0; i < width; i++ ) {setcell(Position{i, 0}, Cell{'#', 2});}
+        for (int i = 0; i < height; i++ ) {setcell(Position{0, i}, Cell{'#', 2});}
 
-        for (int i = 0; i < width; i++ ) {setcell(Position{i, height - 1}, Cell{'#', 1});}
-        for (int i = 0; i < height; i++ ) {setcell(Position{width - 1, i}, Cell{'#', 1});}
+        for (int i = 0; i < width; i++ ) {setcell(Position{i, height - 1}, Cell{'#', 2});}
+        for (int i = 0; i < height; i++ ) {setcell(Position{width - 1, i}, Cell{'#', 2});}
+    }
+
+    if (0.0 < RANDOM_WALLS_CHANCE_MIN && 0.0 < RANDOM_WALLS_CHANCE_MAX) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        std::bernoulli_distribution wall_dist_min (RANDOM_WALLS_CHANCE_MIN);
+        std::bernoulli_distribution wall_dist_max (RANDOM_WALLS_CHANCE_MAX);
+
+        for (int i = 0; i < 2; i++) {
+            for (size_t y = 0; y < matrix->size(); ++y) {
+                for (size_t x = 0; x < (*matrix)[y].size(); ++x) {
+                    if (
+                        '#' == (*matrix)[(y - 1 + height) % height][x].character
+                        || '#' == (*matrix)[y][(x - 1 + width) % width].character
+                        || '#' == (*matrix)[(y + 1) % height][x].character
+                        || '#' == (*matrix)[y][(x + 1) % width].character
+                    ) {
+                        if ( !wall_dist_max(gen) ) continue;
+                    } else {
+                        if ( !wall_dist_min(gen) ) continue;
+                    }
+
+                    (*matrix)[y][x] = Cell{'#', 2}; 
+                    mvaddch(1 + y, 1 + x, '#' | COLOR_PAIR(2));
+                }
+            }
+        }
     }
 }
 
@@ -261,7 +289,7 @@ bool isSnakeHead (const char c) {
 // Sensorial extraction
 vectorf32 Board::get_sensorial_data (Position p) {
     vectorf32 slice;
-    slice.reserve(11 * 11 * 6);
+    slice.reserve(11 * 11 * 6 + 16);
 
     for (int i = -5; i <= 5; i++) {
         for (int j = -5; j <= 5; j++) {
@@ -269,7 +297,7 @@ vectorf32 Board::get_sensorial_data (Position p) {
             Position point = (p + Position{j, i}).mold(dimentions);
             char c = (*matrix)[point.y][point.x].character;
 
-            slice.push_back( static_cast<float>(c) * (1.0 / 256.0));
+            slice.push_back( static_cast<float>(c) * (1.0 / 255.0));
             slice.push_back( static_cast<float>((*matrix)[point.y][point.x].colorPair) * (1.0 / 16.0));
 
             slice.push_back( isSolid(c) ? 1.0 : 0.0 );
@@ -311,7 +339,7 @@ void Board::set_cursor (const Position p, const char type, const bool put) {
     char current = get_cell(p).character;
 
     if ('#' == type) {
-        cursor_is_over = '#' == current ? Cell{' ', 0} : Cell{'#', 1};
+        cursor_is_over = '#' == current ? Cell{' ', 0} : Cell{'#', 2};
         setcell(p, cursor_is_over);
     } else if ('X' == type) {
         cursor_is_over = Cell('6', 1);

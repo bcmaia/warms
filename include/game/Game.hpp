@@ -42,5 +42,6 @@ class Game {
         void process_thought();
         void run_simulation(float delta_time);
         void updateBestItem(const SavedGenome& newItem);
-        Genome getRandomGenome();
+        SavedGenome getRandomGenome();
+        Genome get_random_parent ();
 };

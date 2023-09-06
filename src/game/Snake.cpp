@@ -90,6 +90,9 @@ Snake::Snake(
 void Snake::die (Board& board) {
     alive = false;
 
+    fitness -= 3.0;
+    if (0 < fitness) fitness *= 0.5;
+
     for (const Position &p : body) {
         board.setcell(p, Cell{'&', 1});
     }
@@ -103,32 +106,40 @@ void Snake::think(Board& board) {
     // printf("< sensorial input size [%ld] >", sensorial_input.size());
     // exit(1);
 
-    sensorial_input.push_back( ((float)lenght) * (1.0 / 255.0) );
+    sensorial_input.push_back( ((float)lenght) * (1.0 / 64.0) );
     sensorial_input.push_back( dis(gen) );
     sensorial_input.push_back( state );
     sensorial_input.push_back( time_alive );
+    sensorial_input.push_back( static_cast<float>(facing) * (1.0 / 3.0) );
+    sensorial_input.push_back( static_cast<float>(oldFacing) * (1.0 / 3.0) );
 
     vectorf32 decision_vec = genome.think(sensorial_input);
-    state = decision_vec[3];
-    
-    int biggest = 0;
+    state = decision_vec[0];
+    float new_direction = decision_vec[1];
 
-    for (size_t i = 0; i < 3; i++) {
-        if (decision_vec[i] > decision_vec[biggest]) biggest = i;
-    }
+    if (-0.5 > new_direction) facing = rotate(facing, false);
+    else if (0.5 < new_direction) facing = rotate(facing, true);
+    
+    // int biggest = 0;
+
+    // for (size_t i = 0; i < 3; i++) {
+    //     if (decision_vec[i] > decision_vec[biggest]) biggest = i;
+    // }
+
+    if (oldFacing != facing) fitness -= 0.01;
 
     oldFacing = facing;
 
-    switch (biggest) {
-        case 1: 
-            facing = rotate(facing, false);
-            break;
-        // case 1:
-        //     break;
-        case 2: 
-            facing = rotate(facing, true);
-            break;
-    }
+    // switch (biggest) {
+    //     case 1: 
+    //         facing = rotate(facing, false);
+    //         break;
+    //     // case 1:
+    //     //     break;
+    //     case 2: 
+    //         facing = rotate(facing, true);
+    //         break;
+    // }
     //facing = ((int)(rand() % 5)) != 1 ? Direction::Left : Direction::Up;
 
     //if (oldFacing != facing) fitness += 1.0;
@@ -167,7 +178,7 @@ void Snake::move(Board& board, float deltaTime) {
         fitness += 1.0;
     }
 
-    //fitness += deltaTime * 0.000001;
+    fitness += deltaTime * 0.01;
     
 
     // Add new cell

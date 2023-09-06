@@ -8,12 +8,9 @@
 #include "Board.hpp"
 #include "Genome.hpp"
 
+#include "constants.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-
-
-// Determines how many 
-#define SHRINK_FACTOR (1.0 / 10000.0)
 
 
 class Snake {
@@ -50,6 +47,8 @@ class Snake {
         unsigned short lenght;
 
     private:
+        float energy;
+
         float state;
         
         // float time_alive;

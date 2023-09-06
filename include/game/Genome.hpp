@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.hpp"
 #include "utils.hpp"
 #include "types.hpp"
 
@@ -10,17 +11,10 @@
 #include <cmath>
 
 
-#define OUTPUT_SIZE (4)
-#define MIND_SIZE (11 * 11 * 5 + 4)
-#define MUTATION_RATE (0.01)
-#define MUTATION_RATE_2 (0.1)
-
-#define INPUT_SIZE (11 * 11 * 5 + 4)
-#define HIDDEN_SIZE (64)
-
 
 class Genome {
     public:
+        float speed;
         matrixf32 input_to_hidden_weights;
         vectorf32 hidden_biases;
         matrixf32 hidden_to_output_weights;
@@ -42,47 +36,62 @@ class Genome {
             hidden_to_output_weights = generateRandomMatrix(OUTPUT_SIZE, HIDDEN_SIZE, seed);
             output_biases = generateRandomVector(OUTPUT_SIZE, seed);
 
+            speed = MIN_SPEED;
             colorPair = 10;
         }
 
         Genome(const Genome& parent1, const Genome& parent2, unsigned long seed) {
-        // Constructor for crossover between two Genomes
-        std::mt19937 gen(seed);
-        std::uniform_real_distribution<float> dis2(-3.0, 3.0);
-        std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
-        std::bernoulli_distribution mutateDist(MUTATION_RATE);
-        std::bernoulli_distribution mutationTypeDist(0.5);
+            // Constructor for crossover between two Genomes
+            std::mt19937 gen(seed);
+            std::uniform_real_distribution<float> dis2(-3.0, 3.0);
+            std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
+            std::bernoulli_distribution mutateDist(MUTATION_RATE);
+            std::bernoulli_distribution mutationTypeDist(0.5);
 
-        input_to_hidden_weights = matrixf32(HIDDEN_SIZE, vectorf32(INPUT_SIZE, 0.0));
-        hidden_biases = vectorf32(HIDDEN_SIZE, 0.0);
-        hidden_to_output_weights = matrixf32(OUTPUT_SIZE, vectorf32(HIDDEN_SIZE, 0.0));
-        output_biases = vectorf32(OUTPUT_SIZE, 0.0);
+            input_to_hidden_weights = matrixf32(HIDDEN_SIZE, vectorf32(INPUT_SIZE, 0.0));
+            hidden_biases = vectorf32(HIDDEN_SIZE, 0.0);
+            hidden_to_output_weights = matrixf32(OUTPUT_SIZE, vectorf32(HIDDEN_SIZE, 0.0));
+            output_biases = vectorf32(OUTPUT_SIZE, 0.0);
 
-        for (size_t i = 0; i < HIDDEN_SIZE; ++i) {
-            for (size_t j = 0; j < INPUT_SIZE; ++j) {
-                input_to_hidden_weights[i][j] = (1 == dis(gen)) ? parent1.input_to_hidden_weights[i][j] : parent2.input_to_hidden_weights[i][j];
+            speed = (1 == dis(gen)) ? parent1.speed : parent2.speed;
+
+            for (size_t i = 0; i < HIDDEN_SIZE; ++i) {
+                for (size_t j = 0; j < INPUT_SIZE; ++j) {
+                    input_to_hidden_weights[i][j] = (1 == dis(gen)) ? parent1.input_to_hidden_weights[i][j] : parent2.input_to_hidden_weights[i][j];
+                }
+                hidden_biases[i] = (1 == dis(gen)) ? parent1.hidden_biases[i] : parent2.hidden_biases[i];
             }
-            hidden_biases[i] = (1 == dis(gen)) ? parent1.hidden_biases[i] : parent2.hidden_biases[i];
-        }
 
-        for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
-            for (size_t j = 0; j < HIDDEN_SIZE; ++j) {
-                hidden_to_output_weights[i][j] = (1 == dis(gen)) ? parent1.hidden_to_output_weights[i][j] : parent2.hidden_to_output_weights[i][j];
+            for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
+                for (size_t j = 0; j < HIDDEN_SIZE; ++j) {
+                    hidden_to_output_weights[i][j] = (1 == dis(gen)) ? parent1.hidden_to_output_weights[i][j] : parent2.hidden_to_output_weights[i][j];
+                }
+                output_biases[i] = (1 == dis(gen)) ? parent1.output_biases[i] : parent2.output_biases[i];
             }
-            output_biases[i] = (1 == dis(gen)) ? parent1.output_biases[i] : parent2.output_biases[i];
+
+            colorPair = (1 == dis(gen)) ? parent1.colorPair : parent2.colorPair;
+
+            mutate(MUTATION_RATE, seed);
         }
-
-        colorPair = (1 == dis(gen)) ? parent1.colorPair : parent2.colorPair;
-
-        mutate(MUTATION_RATE, seed);
-    }
 
     void mutate(float mutationProbability, unsigned long seed) {
         std::mt19937 gen(seed);
         std::uniform_real_distribution<float> dis2(-3.0, 3.0);
         std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
         std::bernoulli_distribution mutateDist(mutationProbability);
-        std::bernoulli_distribution mutationTypeDist(0.5);
+        std::bernoulli_distribution mutationTypeDist(0.75);
+
+        if (mutateDist(gen)) {
+            if (mutationTypeDist(gen))
+                speed = dis(gen);
+            else
+                speed *= dis2(gen);
+
+            speed = 
+                MIN_SPEED > speed ? MIN_SPEED :
+                MAX_SPEED < speed ? MAX_SPEED :
+                speed;
+        }
 
         for (size_t i = 0; i < HIDDEN_SIZE; ++i) {
             for (size_t j = 0; j < INPUT_SIZE; ++j) {
@@ -118,7 +127,8 @@ class Genome {
             }
         }
 
-        if (mutateDist(gen)) {
+        std::bernoulli_distribution colorMutateDist(COLOR_MUTATION_RATE);
+        if (colorMutateDist(gen)) {
             colorPair = static_cast<unsigned>(16 + 16 * dis(gen)) % 16;
         }
     }
