@@ -13,7 +13,7 @@
 #define RANDOM_WALLS_CHANCE_MIN (1.0 / 131.0)
 #define RANDOM_WALLS_CHANCE_MAX (1.0 / 3.0)
 
-#define CLEANER_TIMER (5 * 1000)
+#define CLEANER_TIMER (10 * 1000)
 
 // SNAKE FACTORS
 // SHRINK_FACTOR : Increase it and snakes will shrink faster.
