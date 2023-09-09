@@ -88,10 +88,12 @@ Snake::Snake(
 
 
 void Snake::die (Board& board) {
+    if (!alive) return; // he is already dead!
+
     alive = false;
 
-    fitness -= 3.0;
-    if (0 < fitness) fitness *= 0.5;
+    fitness -= 1.0;
+    if (0 < fitness) fitness *= 0.9;
 
     for (const Position &p : body) {
         board.setcell(p, Cell{'&', 1});
@@ -117,8 +119,8 @@ void Snake::think(Board& board) {
     state = decision_vec[0];
     float new_direction = decision_vec[1];
 
-    if (-0.5 > new_direction) facing = rotate(facing, false);
-    else if (0.5 < new_direction) facing = rotate(facing, true);
+    if (new_direction < -3.14 ) facing = rotate(facing, false);
+    else if (new_direction > 3.14 ) facing = rotate(facing, true);
     
     // int biggest = 0;
 
@@ -126,7 +128,7 @@ void Snake::think(Board& board) {
     //     if (decision_vec[i] > decision_vec[biggest]) biggest = i;
     // }
 
-    if (oldFacing != facing) fitness -= 0.01;
+    if (oldFacing != facing) fitness -= 0.001;
 
     oldFacing = facing;
 
