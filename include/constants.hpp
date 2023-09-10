@@ -1,8 +1,8 @@
 #pragma once
 
-#define POPULATION_SIZE (32)
-#define GOATS_VEC_SIZE (32)
-#define STOCK_VEC_SIZE (256)
+#define POPULATION_SIZE (64)
+#define GOATS_VEC_SIZE (128)
+#define STOCK_VEC_SIZE (1024)
 #define MAKE_SIMULATION_GREAT_AGAIN (false)
 
 #define MIN_SPEED (1.0)
@@ -10,10 +10,10 @@
 
 #define STARTING_ENERGY (5.0)
 
-#define RANDOM_WALLS_CHANCE_MIN (1.0 / 131.0)
-#define RANDOM_WALLS_CHANCE_MAX (1.0 / 3.0)
+#define RANDOM_WALLS_CHANCE_MIN (1.0 / 248.0)
+#define RANDOM_WALLS_CHANCE_MAX (1.0 / 2.5)
 
-#define CLEANER_TIMER (5 * 1000)
+#define CLEANER_TIMER (10 * 1000)
 
 // SNAKE FACTORS
 // SHRINK_FACTOR : Increase it and snakes will shrink faster.
@@ -22,7 +22,7 @@
 // MUTATION RATES
 #define MUTATION_RATE (0.001)
 #define MUTATION_RATE_2 (0.01)
-#define COLOR_MUTATION_RATE (0.02)
+#define COLOR_MUTATION_RATE (0.01)
 
 // NEURAL NETWORK SIZE
 // NOTE: changing this values can break stuff
