@@ -64,7 +64,7 @@
 PROGRAM_NAME := myapp
 CC := g++
 CCFLAGS := -Wall -Wextra
-LDFLAGS := -lm -lncurses
+LDFLAGS := -lm -lncurses -ltbb 
 STD_MODE := debug
 VALGRIND_FLAGS := --leak-check=full --show-leak-kinds=all
 
