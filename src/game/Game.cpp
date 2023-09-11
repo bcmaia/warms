@@ -24,6 +24,8 @@ Game::Game(unsigned long seed, unsigned population_size) : gen(seed), board(), p
     // It is best to garante that those vecs always have something than to check
     // every frame if they are emptys
     bests = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
+    std::make_heap(bests.begin(), bests.end(), std::greater<SavedGenome>());
+
     stock = std::vector<SavedGenome>(1, SavedGenome{0.0, Genome(seed)});
 
     // Reserve max space (with a little extra)
@@ -78,6 +80,8 @@ void Game::reproduce() {
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
         if (!snake.alive) {
+            updateBestItem(SavedGenome(snake.fitness, snake.genome));
+
             Genome parent_1 = get_random_parent();
             Genome parent_2 = get_random_parent();
 
@@ -85,14 +89,18 @@ void Game::reproduce() {
             Position p = board.rand_empty_position(snakeSeed);
            
             new_snakes.push_back( Snake(parent_1, parent_2, snakeSeed, p, 5) );
+            new_snakes.back().render(board);
         }
     }
+
+    bool render_flag = 0 < new_snakes.size();
 
     size_t index = 0;
     for (size_t i = 0; i < agents.size(); i++) {
         Snake& snake = agents[i];
         if (!snake.alive) {
             agents[i] = new_snakes[index++];
+            // agents[i]
         }
     }
 
@@ -100,6 +108,10 @@ void Game::reproduce() {
     //     agents.push_back(new_snakes.back());
     //     new_snakes.pop_back();
     // }
+
+    // Hot fix
+    // TODO: solve bug.
+    if (render_flag) board.render_static();
 }
 
 
@@ -189,6 +201,15 @@ void Game::run() {
     //constexpr double cleaner_factor = 1000.0;
     double cleaner_timer = 0;
 
+    constexpr float save_csv_time = 1 * 1000.0;
+    float save_csv = save_csv_time * 99.0 / 100.0;
+
+    float soft_genocide_time = 0;
+
+    std::ofstream outFile;
+    outFile.open(FITNESS_LOG_FILE_NAME);
+    outFile << "best, best_n" << std::endl;
+
     while (running) {
         // auto frameStart = Clock::now();
 
@@ -221,6 +242,7 @@ void Game::run() {
         run_simulation(delta_time);
 
         board.set_delta_time( timer.get_delta_time() );
+        //board.render_static();
         board.render();
         //board.displayValue( timer.get_delta_time() * SECONDS_TO_MILISECONDS );
 
@@ -237,7 +259,23 @@ void Game::run() {
         // if (sleepDuration > std::chrono::duration<double>(0)) {
         //     std::this_thread::sleep_for(sleepDuration);
         // }
+
+        save_csv += timer.get_delta_time();
+        if (save_csv > save_csv_time) {
+            save_csv = 0;
+            if ( 0 < bests.size() ) {
+                outFile << bests.back().fitness << ", " << bests.front().fitness << std::endl;
+            }
+        }
+        
+        soft_genocide_time += delta_time;
+        if (soft_genocide_time > SOFT_GENOCIDE_INTERVAL) {
+            soft_genocide_time = 0;
+            soft_genocide();
+        }
     }
+
+    outFile.close();
 }
 
 
@@ -252,12 +290,18 @@ void Game::updateBestItem(const SavedGenome& newItem) {
 
     if (bests.size() < GOATS_VEC_SIZE) {
         bests.push_back(newItem);
-        std::push_heap(bests.begin(), bests.end());
-    } else if (newItem < bests.front()) {
-        std::pop_heap(bests.begin(), bests.end());
-        bests.pop_back();
+        std::push_heap(bests.begin(), bests.end(), std::greater<SavedGenome>()); // Push and maintain min-heap property
+    } else /*if (newItem > bests.back())*/ {
+        // std::pop_heap(bests.begin(), bests.end()); // Remove the smallest item
+        // bests.pop_back(); // Remove it from the vector
+        // bests.push_back(newItem); // Push the new item
+        // std::push_heap(bests.begin(), bests.end()); // Maintain min-heap property
+
         bests.push_back(newItem);
-        std::push_heap(bests.begin(), bests.end());
+        std::push_heap(bests.begin(), bests.end(), std::greater<SavedGenome>());
+
+        std::pop_heap(bests.begin(), bests.end(), std::greater<SavedGenome>()); // Removes the smallest item (the root)
+        bests.pop_back(); // Remove it from the vector
     }
 }
 
@@ -339,3 +383,34 @@ Genome Game::get_random_parent () {
 //     // Return the random SavedGenome from the selected vector
 //     return selectedVector[randomIndex];
 // }
+
+
+// Function to remove all items from a vector except the greatest one
+void Game::soft_genocide () {
+    if (bests.empty()) {
+        return; // No elements to keep
+    }
+
+    // Find the greatest element in the beststor
+    SavedGenome* greatest_ref = &bests[0];
+    for (size_t i = 0; i < bests.size(); ++i) {
+        if (bests[i] > *greatest_ref) {
+            greatest_ref = &bests[i];
+        }
+    }
+
+    SavedGenome goat = *greatest_ref;
+
+    // Use the erase-remove idiom to remove elements that are not the greatest
+    bests.clear();
+    bests.push_back(goat);
+
+    std::bernoulli_distribution dist(0.5);
+    std::uniform_int_distribution<unsigned long> seed_dist (0, std::numeric_limits<unsigned long>::max());
+
+    for (size_t i = 0; i < stock.size(); ++i) {
+        if (dist(gen)) {
+            stock[i] = SavedGenome(0.0, Genome(seed_dist(gen)));
+        }
+    }
+}

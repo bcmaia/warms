@@ -63,7 +63,7 @@ class Board {
         unsigned short height;
 
         std::unique_ptr<std::vector<std::vector<Cell>>> matrix;
-        std::unique_ptr<std::vector<std::vector<float>>> auxiliar;
+        //std::unique_ptr<std::vector<std::vector<float>>> auxiliar;
 
         //void swap() {std::swap(matrix, auxiliar);};
         void reset ();

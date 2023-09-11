@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <execution>
+#include <fstream>
 
 #include "constants.hpp"
 #include "types.hpp"
@@ -44,4 +45,5 @@ class Game {
         void updateBestItem(const SavedGenome& newItem);
         SavedGenome getRandomGenome();
         Genome get_random_parent ();
+        void soft_genocide ();
 };

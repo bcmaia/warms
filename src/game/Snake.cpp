@@ -27,7 +27,8 @@ Snake::Snake(
     lenght = start_lenght;
     r = dis(gen);
     colorPair = 1 + static_cast<unsigned>(r) % 14;
-    body.emplace_back(initial);
+    body.push_back(initial);
+    neck = initial;
 
     speed = 0.01;
     movement = 0;
@@ -68,13 +69,15 @@ Snake::Snake(
     //body.reserve(8);
     lenght = start_lenght;
     r = dis(gen);
-    colorPair = 1 + static_cast<unsigned>(r) % 14;
-    body.emplace_back(initial);
+    //colorPair = 1 + static_cast<unsigned>(r) % 14;
+    body.push_back(initial);
+    //board.setcell(body.front(), Cell('@', genome.colorPair));
 
     speed = 0.01;
     movement = 0;
 
     shrink = 0;
+    fitness = 0;
 
     // Initialize other member variables if needed
     // Example: initialize body, length, facing, etc.
@@ -88,17 +91,37 @@ Snake::Snake(
 
 
 void Snake::die (Board& board) {
+    if (!alive) return; // You can only die once.
+
     alive = false;
 
-    fitness -= 3.0;
-    if (0 < fitness) fitness *= 0.5;
+    //fitness -= 1.0;
+    if (0 < fitness) fitness *= 0.9;
 
     for (const Position &p : body) {
         board.setcell(p, Cell{'&', 1});
     }
+
+    if (dead_cell.has_value()) {
+        board.setcell(dead_cell.unwrap(), Cell{' ', 0});
+        board.setcell(body.back(), Cell{' ', 0});
+        dead_cell.clear();
+    }
+
+    if (dead_cell_2.has_value()) {
+        board.setcell(dead_cell_2.unwrap(), Cell{' ', 0});
+        dead_cell_2.clear();
+    }
+
+    if (new_cell.has_value()) {
+        board.setcell(neck, Cell{'&', 1});
+        board.setcell(new_cell.unwrap(), Cell{'&', 1});
+        new_cell.clear();
+    }
 }
 
 void Snake::think(Board& board) {
+    if (!alive) return;
     vectorf32 sensorial_input = board.get_sensorial_data(body.front());
     
     std::uniform_real_distribution<float> dis(-2.0, 2.0);
@@ -126,7 +149,7 @@ void Snake::think(Board& board) {
     //     if (decision_vec[i] > decision_vec[biggest]) biggest = i;
     // }
 
-    if (oldFacing != facing) fitness -= 0.01;
+    // if (oldFacing != facing) fitness -= 0.01;
 
     oldFacing = facing;
 
@@ -154,8 +177,9 @@ void Snake::move(Board& board, float deltaTime) {
     if (1.0 < shrink) {
         lenght--;
         shrink--;
-        if (3 > lenght) {die(board); return;}
     } 
+
+    if (3 > lenght) {die(board); return;}
 
     // If we have momentum
     movement += speed * deltaTime;
@@ -178,7 +202,7 @@ void Snake::move(Board& board, float deltaTime) {
         fitness += 1.0;
     }
 
-    fitness += deltaTime * 0.01;
+    fitness += deltaTime * 0.001;
     
 
     // Add new cell
@@ -202,9 +226,11 @@ void Snake::move(Board& board, float deltaTime) {
 
 
 void Snake::shed_dead_cell (Board& board) {
+    if (!alive) return;
+
     if (dead_cell.has_value()) {
+        if (body.size() >= 3) board.setcell(body.back(), Cell('+', genome.colorPair));
         board.setcell(dead_cell.unwrap(), Cell(' ', 0));
-        board.setcell(body.back(), Cell('+', genome.colorPair));
         dead_cell.clear();
     }
 
@@ -215,6 +241,8 @@ void Snake::shed_dead_cell (Board& board) {
 }
 
 void Snake::show_new_cell (Board& board) {
+    if (!alive) return; 
+
     if (new_cell.has_value()) {
         board.setcell(neck, Cell{'*', genome.colorPair});
         board.setcell(new_cell.unwrap(), Cell{'@', genome.colorPair});
@@ -223,13 +251,16 @@ void Snake::show_new_cell (Board& board) {
 }
 
 void Snake::render (Board& board) {
+    if (!alive) return;
+
     for (const Position &p : body) {
         board.setcell(p, Cell{'*', genome.colorPair});
     }
 
-    if (0 < body.size()) {
+    if (0 < body.size()) board.setcell(body.front(), Cell{'@', genome.colorPair});
+
+    if (3 <= body.size()) {
         board.setcell(body.back(), Cell{'+', genome.colorPair});
-        board.setcell(body.front(), Cell{'@', genome.colorPair});
     }
 }
 

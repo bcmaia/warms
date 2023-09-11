@@ -76,10 +76,12 @@ class Genome {
 
     void mutate(float mutationProbability, unsigned long seed) {
         std::mt19937 gen(seed);
-        std::uniform_real_distribution<float> dis2(-3.0, 3.0);
-        std::uniform_real_distribution<float> dis(-1000.0, 1000.0);
+
+        std::uniform_real_distribution<float> dis2(-2.0, 2.0);
+        std::uniform_real_distribution<float> dis(-1.0, 1.0);
+
         std::bernoulli_distribution mutateDist(mutationProbability);
-        std::bernoulli_distribution mutationTypeDist(0.75);
+        std::bernoulli_distribution mutationTypeDist(0.5);
 
         if (mutateDist(gen)) {
             if (mutationTypeDist(gen))
@@ -207,7 +209,10 @@ class SavedGenome {
         float fitness;
         Genome genome;
 
-        bool operator< (const SavedGenome& other) const {
-            return fitness < other.fitness;
+        SavedGenome (float saved_fitness, const Genome& saved_genome) 
+            : fitness(saved_fitness), genome(saved_genome) {}
+
+        bool operator> (const SavedGenome& other) const {
+            return fitness > other.fitness;
         }
 };

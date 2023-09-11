@@ -20,7 +20,7 @@ class Snake {
             Position initial, 
             unsigned short start_lenght
         );
-         Snake(
+        Snake(
             Genome& parent1,
             Genome& parent2,
             unsigned long seed, 

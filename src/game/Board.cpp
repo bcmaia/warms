@@ -40,10 +40,10 @@ Board::Board() {
         height, std::vector<Cell>(width, Cell{' ', 1})
     );
 
-    float empty_cell_float_value = Cell{' ', 1}.to_float();
-    auxiliar = std::make_unique<std::vector<std::vector<float>>>(
-        height, std::vector<float>(width, empty_cell_float_value)
-    );
+    // float empty_cell_float_value = Cell{' ', 1}.to_float();
+    // auxiliar = std::make_unique<std::vector<std::vector<float>>>(
+    //     height, std::vector<float>(width, empty_cell_float_value)
+    // );
 
     atexit(Board::cleanupNcurses);
 
@@ -114,7 +114,7 @@ void printStackTrace() {
     
 void Board::setcell(Position point, Cell cell) {
     #ifdef RELEASE
-        (*auxiliar)[point.y][point.x] = cell.to_float();
+        //(*auxiliar)[point.y][point.x] = cell.to_float();
         (*matrix)[point.y][point.x] = cell;
 
     #else
@@ -124,7 +124,7 @@ void Board::setcell(Position point, Cell cell) {
             errorStream << "Point (" << point.x << ", " << point.y << ") is outside of board (" << width << ", " << height << ")";
             throw std::runtime_error(errorStream.str());
         }
-        (*auxiliar)[point.y % height][point.x % width] = cell.to_float();
+        //(*auxiliar)[point.y % height][point.x % width] = cell.to_float();
         (*matrix)[point.y % height][point.x % width] = cell;
     #endif
 
@@ -168,6 +168,8 @@ void Board::render_static () const {
             mvaddch(1 + y, 1 + x, cell.character | COLOR_PAIR(cell.colorPair));
         }
     }
+
+    refresh();
 }
 
 void Board::rot_all () {
@@ -178,6 +180,8 @@ void Board::rot_all () {
             mvaddch(1 + y, 1 + x, cell.character | COLOR_PAIR(cell.colorPair));
         }
     }
+
+    refresh();
 }
 
 void Board::render () {
@@ -210,7 +214,7 @@ void Board::reset () {
     for (size_t i = 0; i < height; i++) {
         for (size_t j = 0; j < width; j++) {
             (*matrix)[i][j] = Cell{' ', 0};
-            (*auxiliar)[i][j] = Cell{' ', 0}.to_float();
+            //(*auxiliar)[i][j] = Cell{' ', 0}.to_float();
         }
     }
 }
