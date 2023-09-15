@@ -77,61 +77,34 @@ class Genome {
     void mutate(float mutationProbability, unsigned long seed) {
         std::mt19937 gen(seed);
 
-        std::uniform_real_distribution<float> dis2(-2.0, 2.0);
         std::uniform_real_distribution<float> dis(-1.0, 1.0);
-
         std::bernoulli_distribution mutateDist(mutationProbability);
-        std::bernoulli_distribution mutationTypeDist(0.5);
-
-        if (mutateDist(gen)) {
-            if (mutationTypeDist(gen))
-                speed = dis(gen);
-            else
-                speed *= dis2(gen);
-
-            speed = 
-                MIN_SPEED > speed ? MIN_SPEED :
-                MAX_SPEED < speed ? MAX_SPEED :
-                speed;
-        }
 
         for (size_t i = 0; i < HIDDEN_SIZE; ++i) {
             for (size_t j = 0; j < INPUT_SIZE; ++j) {
                 if (mutateDist(gen)) {
-                    if (mutationTypeDist(gen))
-                        input_to_hidden_weights[i][j] = dis(gen);
-                    else
-                        input_to_hidden_weights[i][j] *= dis2(gen);
+                    input_to_hidden_weights[i][j] = dis(gen);
                 }
             }
             if (mutateDist(gen)) {
-                if (mutationTypeDist(gen))
-                    hidden_biases[i] = dis(gen);
-                else
-                    hidden_biases[i] *= dis2(gen);
+                hidden_biases[i] = dis(gen);
             }
         }
 
         for (size_t i = 0; i < OUTPUT_SIZE; ++i) {
             for (size_t j = 0; j < HIDDEN_SIZE; ++j) {
                 if (mutateDist(gen)) {
-                    if (mutationTypeDist(gen))
-                        hidden_to_output_weights[i][j] = dis(gen);
-                    else
-                        hidden_to_output_weights[i][j] *= dis2(gen);
+                    hidden_to_output_weights[i][j] = dis(gen);
                 }
             }
             if (mutateDist(gen)) {
-                if (mutationTypeDist(gen))
-                    output_biases[i] = dis(gen);
-                else
-                    output_biases[i] *= dis2(gen);
+                output_biases[i] = dis(gen);
             }
         }
 
-        std::bernoulli_distribution colorMutateDist(COLOR_MUTATION_RATE);
-        if (colorMutateDist(gen)) {
-            colorPair = static_cast<unsigned>(16 + 16 * dis(gen)) % 16;
+        if (mutateDist(gen)) {
+            std::uniform_int_distribution<unsigned> color_dist(0, 15);
+            colorPair = color_dist(gen);
         }
     }
 

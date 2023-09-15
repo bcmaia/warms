@@ -41,7 +41,7 @@ class Board {
 
         void toggle_screen_active();
 
-        vectorf32 get_sensorial_data (Position p);
+        vectorf32 get_sensorial_data (Position p, Direction dir);
         Position trueCoords (const Position p) const; 
 
         bool compare (const Position point, const char c) const;

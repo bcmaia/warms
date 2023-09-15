@@ -291,18 +291,44 @@ bool isSnakeHead (const char c) {
 
 
 // Sensorial extraction
-vectorf32 Board::get_sensorial_data (Position p) {
+vectorf32 Board::get_sensorial_data (Position p, Direction dir) {
     vectorf32 slice;
-    slice.reserve(11 * 11 * 6 + 16);
+    slice.reserve(7 * 7 * 4);
 
-    for (int i = -5; i <= 5; i++) {
-        for (int j = -5; j <= 5; j++) {
+    for (int i = -3; i <= 3; i++) {
+        for (int j = -3; j <= 3; j++) {
+            int y, x;
 
-            Position point = (p + Position{j, i}).mold(dimentions);
+            switch (dir) {
+                case Direction::Up: 
+                    y = i;
+                    x = j;
+                    break;
+
+                case Direction::Right: 
+                    y = -j;
+                    x = i;
+                    break;
+                
+                case Direction::Down: 
+                    y = -i;
+                    x = -j;
+                    break;
+
+                case Direction::Left: 
+                    y = j;
+                    x = -i;
+                    break;
+
+                default:
+                    y = i;
+                    x = j;
+                    break;
+            }
+
+            Position point = (p + Position(x, y)).mold(dimentions);
+            
             char c = (*matrix)[point.y][point.x].character;
-
-            slice.push_back( static_cast<float>(c) * (1.0 / 255.0));
-            slice.push_back( static_cast<float>((*matrix)[point.y][point.x].colorPair) * (1.0 / 16.0));
 
             slice.push_back( isSolid(c) ? 1.0 : 0.0 );
             slice.push_back( isSnake(c) ? 1.0 : 0.0 );

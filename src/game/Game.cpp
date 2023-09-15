@@ -313,43 +313,29 @@ SavedGenome Game::getRandomGenome() {
     
     // If the bests vector is empty, return a default-constructed Genome
     
-    std::uniform_int_distribution<short> which_pool_dist (0, 6);
+    std::uniform_int_distribution<short> which_pool_dist (0, 100);
+    short choice = which_pool_dist(gen);
 
-    switch (which_pool_dist(gen)) {
-        case 0: {
-            // Generate a random index within the bounds of the bests vector
-            std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
-            size_t randomIndex = dist(gen);
+    if (5 >= choice) {
+        // Generate a random index within the bounds of the bests vector
+        std::uniform_int_distribution<size_t> dist(0, stock.size() - 1);
+        size_t randomIndex = dist(gen);
 
-            // Return the genome at the randomly chosen index
-            return stock[randomIndex];
-        } break;
+        // Return the genome at the randomly chosen index
+        return stock[randomIndex];
+    } else if (30 >= choice) {
+        // Generate a random index within the bounds of the bests vector
+        std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
+        size_t randomIndex = dist(gen);
 
-        case 1: {
-            // Generate a random index within the bounds of the bests vector
-            std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
-            size_t randomIndex = dist(gen);
+        // Return the genome at the randomly chosen index
+        return bests[randomIndex];
+    } else { 
+        // Generate a random index within the bounds of the bests vector
+        std::uniform_int_distribution<size_t> dist(0, agents.size() - 1);
+        size_t randomIndex = dist(gen);
 
-            // Return the genome at the randomly chosen index
-            return bests[randomIndex];
-        } break;
-
-        case 2: {
-            // Generate a random index within the bounds of the bests vector
-            std::uniform_int_distribution<size_t> dist(0, bests.size() - 1);
-            size_t randomIndex = dist(gen);
-
-            // Return the genome at the randomly chosen index
-            return bests[randomIndex];
-        } break;
-
-        default: { 
-            // Generate a random index within the bounds of the bests vector
-            std::uniform_int_distribution<size_t> dist(0, agents.size() - 1);
-            size_t randomIndex = dist(gen);
-
-            return SavedGenome {agents[randomIndex].fitness, agents[randomIndex].genome};
-        } break;
+        return SavedGenome {agents[randomIndex].fitness, agents[randomIndex].genome};
     }
 }
 

@@ -122,27 +122,29 @@ void Snake::die (Board& board) {
 
 void Snake::think(Board& board) {
     if (!alive) return;
-    vectorf32 sensorial_input = board.get_sensorial_data(body.front());
+    vectorf32 sensorial_input = board.get_sensorial_data(body.front(), facing);
     
-    std::uniform_real_distribution<float> dis(-2.0, 2.0);
-    // endwin();
-    // printf("< sensorial input size [%ld] >", sensorial_input.size());
-    // exit(1);
-
-    sensorial_input.push_back( ((float)lenght) * (1.0 / 64.0) );
-    sensorial_input.push_back( dis(gen) );
-    sensorial_input.push_back( state );
-    sensorial_input.push_back( time_alive );
-    sensorial_input.push_back( static_cast<float>(facing) * (1.0 / 3.0) );
-    sensorial_input.push_back( static_cast<float>(oldFacing) * (1.0 / 3.0) );
-
+    std::uniform_real_distribution<float> dist(0.0, 1.0);
+    
     vectorf32 decision_vec = genome.think(sensorial_input);
-    state = decision_vec[0];
-    float new_direction = decision_vec[1];
+    vectorf32 probabilities = softmax(decision_vec);
 
-    if (-0.5 > new_direction) facing = rotate(facing, false);
-    else if (0.5 < new_direction) facing = rotate(facing, true);
-    
+    float rand_val = dist(gen); // Generate a random value between 0 and 1
+
+    float cumulative_prob = 0.0f;
+    int i = 0;
+    int N = static_cast<int>(probabilities.size());
+    for (; i < N; i++) {
+        cumulative_prob += probabilities[i];
+        if (rand_val <= cumulative_prob) break;
+    }
+
+    switch (i) {
+        case 0: facing = rotate(facing, false); break;
+        case 1: facing = rotate(facing, true); break;
+        default: break;
+    }
+
     // int biggest = 0;
 
     // for (size_t i = 0; i < 3; i++) {

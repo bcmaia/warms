@@ -30,6 +30,23 @@ vectorf32 generateRandomVector(int size, unsigned long seed) {
     return vector;
 }
 
+std::vector<float> softmax(const std::vector<float>& input) {
+    std::vector<float> result;
+    float sum = 0.0f;
+
+    for (float val : input) {
+        result.push_back(std::exp(val));
+        sum += std::exp(val);
+    }
+
+    for (float& val : result) {
+        val /= sum;
+    }
+
+    return result;
+}
+
+
 
 // vectorf32 mul_matrix_by_vec(const matrixf32& matrix, const vectorf32& vector, const vectorf32& addens) {
 //     std::vector<float> result(3);
