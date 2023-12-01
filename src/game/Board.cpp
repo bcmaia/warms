@@ -293,10 +293,66 @@ bool isSnakeHead (const char c) {
 // Sensorial extraction
 vectorf32 Board::get_sensorial_data (Position p, Direction dir) {
     vectorf32 slice;
-    slice.reserve(7 * 7 * 4);
+    slice.reserve(7 * 7 * 4 + 8 * 4);
+
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (0 == i && 0 == j) continue;
+
+            int y, x;
+
+            switch (dir) {
+                case Direction::Up: 
+                    y = i;
+                    x = j;
+                    break;
+
+                case Direction::Right: 
+                    y = -j;
+                    x = i;
+                    break;
+                
+                case Direction::Down: 
+                    y = -i;
+                    x = -j;
+                    break;
+
+                case Direction::Left: 
+                    y = j;
+                    x = -i;
+                    break;
+
+                default:
+                    y = i;
+                    x = j;
+                    break;
+            }
+
+            bool searching = true;
+            for (int reach = 1; searching && reach < 16; reach++) {
+                Position point = (p + Position(reach * x, reach * y)).mold(dimentions);
+                char c = (*matrix)[point.y][point.x].character;
+                if ( 
+                    isSolid(c) 
+                    || isFood(c) 
+                    || isSnake(c)
+                    || isSnakeHead(c)
+                    || reach == 15
+                ) {
+                    searching = false;
+                    slice.push_back( isSolid(c) ? 1.0 : 0.0 );
+                    slice.push_back( isSnake(c) ? 1.0 : 0.0 );
+                    slice.push_back( isSnakeHead(c) ? 1.0 : 0.0 );
+                    slice.push_back( isFood(c) ? 1.0 : 0.0 );
+                } 
+            }
+        }
+    }
+
 
     for (int i = -3; i <= 3; i++) {
         for (int j = -3; j <= 3; j++) {
+            if (0 == i && 0 == j) continue;
             int y, x;
 
             switch (dir) {

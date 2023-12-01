@@ -273,6 +273,10 @@ void Game::run() {
             soft_genocide_time = 0;
             soft_genocide();
         }
+
+        for (SavedGenome& sg : bests) {
+            sg.fitness *= 1.0 - 0.0000001;
+        }
     }
 
     outFile.close();
